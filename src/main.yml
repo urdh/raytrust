@@ -1,1 +1,8 @@
 name: raytrust
+
+args:
+    - output:
+        help: output file (PGM format)
+        short: o
+        long: output
+        takes_value: true
