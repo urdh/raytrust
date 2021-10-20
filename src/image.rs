@@ -3,7 +3,7 @@ use std::slice::{ChunksExact, ChunksExactMut};
 
 /// Pixels are represented using three floating-point color channels,
 /// with range from `0.0` to `1.0`. There is no alpha channel.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Pixel {
     pub r: f32,
     pub g: f32,
@@ -128,4 +128,52 @@ impl<'a> IntoIterator for &'a mut Image {
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_pixel_default_is_black() {
+        let expected = Pixel {
+            r: 0.0,
+            g: 0.0,
+            b: 0.0,
+        };
+        assert_eq!(Pixel::default(), expected);
+    }
+
+    #[test]
+    fn test_image_size_accessors() {
+        let image = Image::new(32, 8);
+        assert_eq!(image.width(), 32);
+        assert_eq!(image.height(), 8);
+    }
+
+    #[test]
+    fn test_image_index() {
+        let gray = |v: f32| Pixel { r: v, g: v, b: v };
+        let mut image = Image::new(2, 2);
+        for idx in 0..image.pixels.len() {
+            image.pixels[idx] = gray((idx as f32) / 10.0);
+        }
+        assert_eq!(image[0], vec![gray(0.0), gray(0.1)]);
+        assert_eq!(image[1], vec![gray(0.2), gray(0.3)]);
+    }
+
+    #[test]
+    fn test_image_iter() {
+        let image = Image::new(32, 8);
+        assert_eq!(image.iter().count(), image.height());
+        assert!(image.iter().all(|row| row.len() == image.width()));
+    }
+
+    #[test]
+    fn test_image_into_iter() {
+        let image = Image::new(32, 8);
+        for row in &image {
+            for pixel in row {
+                assert_eq!(*pixel, Pixel::default());
+            }
+        }
+    }
+}
