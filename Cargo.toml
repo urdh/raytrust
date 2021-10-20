@@ -12,3 +12,4 @@ clap = { version = "2.33", features = ["yaml"]}
 
 [dev-dependencies]
 pretty_assertions = "1.0"
+indoc = "1.0"
