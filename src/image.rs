@@ -99,7 +99,7 @@ impl Index<usize> for Image {
     type Output = [Pixel];
 
     fn index(&self, index: usize) -> &Self::Output {
-        &self.iter().nth(index).expect("Index out of range")
+        self.iter().nth(index).expect("Index out of range")
     }
 }
 
