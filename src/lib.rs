@@ -1,6 +1,7 @@
 use std::io;
 
 mod image;
+mod linalg;
 
 pub use image::Image;
 
