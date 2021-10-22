@@ -3,22 +3,11 @@ use std::slice::{ChunksExact, ChunksExactMut};
 
 /// Pixels are represented using three floating-point color channels,
 /// with range from `0.0` to `1.0`. There is no alpha channel.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Pixel {
     pub r: f32,
     pub g: f32,
     pub b: f32,
-}
-
-impl Default for Pixel {
-    /// Default-constructs a completely black pixel.
-    fn default() -> Pixel {
-        Pixel {
-            r: 0.0,
-            g: 0.0,
-            b: 0.0,
-        }
-    }
 }
 
 /// An image is a two-dimensional matrix of pixels, with its origin
