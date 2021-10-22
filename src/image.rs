@@ -29,8 +29,8 @@ impl Image {
     ///
     /// # Example
     ///
-    /// ```
-    /// use raytrust::image::Image;
+    /// ```ignore
+    /// use image::Image;
     /// let image = Image::new(32, 32);
     /// assert_eq!(image.width(), 32);
     /// assert_eq!(image.height(), 32);
@@ -58,8 +58,8 @@ impl Image {
     ///
     /// # Example
     ///
-    /// ```
-    /// use raytrust::image::Image;
+    /// ```ignore
+    /// use image::Image;
     /// let image = Image::new(32, 32);
     /// assert_eq!(image.iter().count(), image.height());
     /// ```
@@ -71,8 +71,8 @@ impl Image {
     ///
     /// # Example
     ///
-    /// ```
-    /// use raytrust::image::{Image, Pixel};
+    /// ```ignore
+    /// use image::{Image, Pixel};
     /// let mut image = Image::new(4, 4);
     /// for row in image.iter_mut() {
     ///     row[1] = Pixel { r: 0.5, g: 0.5, b: 0.5 };

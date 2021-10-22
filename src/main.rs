@@ -1,6 +1,6 @@
 use clap::*;
 use core::result::Result;
-use raytrust::{image, write_pgm};
+use raytrust::{write_pgm, Image};
 use std::{fs, io};
 
 fn main() -> Result<(), io::Error> {
@@ -19,6 +19,6 @@ fn main() -> Result<(), io::Error> {
     };
 
     // Sample image
-    let image = image::Image::new(256, 256);
+    let image = Image::new(256, 256);
     write_pgm(&mut *output, &image)
 }
