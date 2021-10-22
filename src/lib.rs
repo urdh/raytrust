@@ -1,6 +1,8 @@
 use std::io;
 
-pub mod image;
+mod image;
+
+pub use image::Image;
 
 /// Serialize an image using the PGM format.
 ///
@@ -12,11 +14,11 @@ pub mod image;
 /// # Example
 ///
 /// ```
-/// use raytrust::{image, write_pgm};
-/// let image = image::Image::new(8, 8);
+/// use raytrust::{Image, write_pgm};
+/// let image = Image::new(8, 8);
 /// write_pgm(&mut std::io::stdout(), &image);
 /// ```
-pub fn write_pgm(stream: &mut (dyn io::Write), image: &image::Image) -> Result<(), io::Error> {
+pub fn write_pgm(stream: &mut (dyn io::Write), image: &Image) -> Result<(), io::Error> {
     writeln!(stream, "P3")?;
     writeln!(stream, "{} {}", image.width(), image.height())?;
     writeln!(stream, "255")?;
@@ -41,7 +43,7 @@ mod test {
 
     #[test]
     fn test_write_pgm() -> Result<(), io::Error> {
-        let mut image = image::Image::new(1, 2);
+        let mut image = Image::new(1, 2);
         image[0][0] = image::Pixel {
             r: 1.0,
             g: 0.5,
