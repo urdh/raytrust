@@ -1,5 +1,5 @@
 use super::Vect3;
-use core::ops::*;
+use auto_ops::*;
 use std::{f32, fmt};
 
 /// A point in ℝ³.
@@ -23,49 +23,25 @@ impl fmt::Display for Point3 {
     }
 }
 
-impl Add<Vect3> for Point3 {
-    type Output = Self;
-
-    fn add(self, other: Vect3) -> Self::Output {
-        Point3 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
+impl_op_ex!(+= |a: &mut Point3, b: &Vect3| { *a = *a + b; });
+impl_op_ex!(+|a: &Point3, b: &Vect3| -> Point3 {
+    Point3 {
+        x: a.x + b.x,
+        y: a.y + b.y,
+        z: a.z + b.z,
     }
-}
+});
 
-impl AddAssign<Vect3> for Point3 {
-    fn add_assign(&mut self, other: Vect3) {
-        *self = *self + other
+impl_op_ex!(-= |a: &mut Point3, b: &Vect3| { *a = *a - b; });
+impl_op_ex!(-|a: &Point3, b: &Vect3| -> Point3 { a + (-b) });
+
+impl_op_ex!(-|a: &Point3, b: &Point3| -> Vect3 {
+    Vect3 {
+        x: a.x - b.x,
+        y: a.y - b.y,
+        z: a.z - b.z,
     }
-}
-
-impl Sub<Vect3> for Point3 {
-    type Output = Self;
-
-    fn sub(self, other: Vect3) -> Self::Output {
-        self + (-other)
-    }
-}
-
-impl SubAssign<Vect3> for Point3 {
-    fn sub_assign(&mut self, other: Vect3) {
-        *self = *self - other
-    }
-}
-
-impl Sub for Point3 {
-    type Output = Vect3;
-
-    fn sub(self, other: Point3) -> Self::Output {
-        Vect3 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
+});
 
 #[cfg(test)]
 mod test {
