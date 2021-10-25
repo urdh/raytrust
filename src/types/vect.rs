@@ -79,6 +79,37 @@ impl_op_ex!(/= |a: &mut Vect3, b: &f32| { *a = *a / b; });
 impl_op_ex!(/|a: &Vect3, b: &f32| -> Vect3 { a * b.recip()});
 
 #[cfg(test)]
+impl approx::AbsDiffEq for Vect3 {
+    type Epsilon = f32;
+
+    fn default_epsilon() -> f32 {
+        f32::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Vect3, epsilon: f32) -> bool {
+        (self - other).norm() <= epsilon
+    }
+}
+
+#[cfg(test)]
+impl approx::UlpsEq for Vect3 {
+    fn default_max_ulps() -> u32 {
+        f32::default_max_ulps()
+    }
+
+    fn ulps_eq(
+        &self,
+        other: &Vect3,
+        epsilon: <Vect3 as approx::AbsDiffEq>::Epsilon,
+        max_ulps: u32,
+    ) -> bool {
+        f32::ulps_eq(&self.x, &other.x, epsilon.clone(), max_ulps)
+            && f32::ulps_eq(&self.y, &other.y, epsilon.clone(), max_ulps)
+            && f32::ulps_eq(&self.z, &other.z, epsilon.clone(), max_ulps)
+    }
+}
+
+#[cfg(test)]
 mod test {
     use super::*;
     use pretty_assertions::assert_eq;
