@@ -6,3 +6,13 @@ args:
         short: o
         long: output
         takes_value: true
+    - width:
+        help: image width
+        long: width
+        takes_value: true
+        default_value: "800"
+    - height:
+        help: image height
+        long: height
+        takes_value: true
+        default_value: "450"
