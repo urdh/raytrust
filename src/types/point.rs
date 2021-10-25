@@ -44,6 +44,37 @@ impl_op_ex!(-|a: &Point3, b: &Point3| -> Vect3 {
 });
 
 #[cfg(test)]
+impl approx::AbsDiffEq for Point3 {
+    type Epsilon = f32;
+
+    fn default_epsilon() -> f32 {
+        f32::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Point3, epsilon: f32) -> bool {
+        (self - other).norm() <= epsilon
+    }
+}
+
+#[cfg(test)]
+impl approx::UlpsEq for Point3 {
+    fn default_max_ulps() -> u32 {
+        f32::default_max_ulps()
+    }
+
+    fn ulps_eq(
+        &self,
+        other: &Point3,
+        epsilon: <Point3 as approx::AbsDiffEq>::Epsilon,
+        max_ulps: u32,
+    ) -> bool {
+        f32::ulps_eq(&self.x, &other.x, epsilon.clone(), max_ulps)
+            && f32::ulps_eq(&self.y, &other.y, epsilon.clone(), max_ulps)
+            && f32::ulps_eq(&self.z, &other.z, epsilon.clone(), max_ulps)
+    }
+}
+
+#[cfg(test)]
 mod test {
     use super::*;
     use pretty_assertions::assert_eq;
