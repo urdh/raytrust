@@ -1,7 +1,7 @@
 use clap::*;
 use core::result::Result;
 use raytrust::{render, write_pgm};
-use std::{fs, io};
+use std::{fs, io, str::FromStr};
 
 fn main() -> Result<(), io::Error> {
     let yml = load_yaml!("main.yml");
@@ -25,6 +25,21 @@ fn main() -> Result<(), io::Error> {
     };
 
     // Sample image
-    let image = render(800, 450);
-    write_pgm(&mut *output, &image)
+    let width = usize::from_str(matches.value_of("width").unwrap()).unwrap();
+    let height = usize::from_str(matches.value_of("height").unwrap()).unwrap();
+    let render_pb = indicatif::ProgressBar::new_spinner().with_message("Rendering image");
+    let render_cb = |row: usize| {
+        render_pb.set_message(format!("Rendered line {}/{}", row, height));
+        render_pb.tick()
+    };
+    let image = render(width, height, render_cb);
+    render_pb.finish_with_message(format!("{} lines rendered!", height));
+
+    // Write to file
+    let save_pb = indicatif::ProgressBar::new_spinner().with_message("Saving image");
+    let save_cb = |_: usize| save_pb.tick();
+    write_pgm(&mut *output, &image, save_cb)?;
+    save_pb.finish_with_message("Image saved!");
+
+    Ok(())
 }

@@ -22,7 +22,11 @@ fn render_ray(ray: Ray) -> image::Pixel {
 ///
 /// * `width` - output image width
 /// * `height` - output image height
-pub fn render(width: usize, height: usize) -> Image {
+/// * `callback` - callback called when a row has been rendered
+pub fn render<F>(width: usize, height: usize, mut callback: F) -> Image
+where
+    F: FnMut(usize),
+{
     let mut image = Image::new(width, height);
 
     // Viewport & focal length
@@ -51,9 +55,7 @@ pub fn render(width: usize, height: usize) -> Image {
         };
 
     // Render the image!
-    let pb = indicatif::ProgressBar::new_spinner();
     for (y, row) in image.iter_mut().rev().enumerate() {
-        pb.set_message(format!("Rendering line {}/{}", (y + 1), height));
         for (x, pixel) in row.iter_mut().enumerate() {
             let u = (x as f32) / ((width as f32) - 1.0);
             let v = (y as f32) / ((height as f32) - 1.0);
@@ -61,9 +63,8 @@ pub fn render(width: usize, height: usize) -> Image {
             let ray = Ray::new(origin, dir);
             *pixel = render_ray(ray);
         }
-        pb.tick();
+        callback(height - y);
     }
-    pb.finish();
 
     image
 }
@@ -74,20 +75,27 @@ pub fn render(width: usize, height: usize) -> Image {
 ///
 /// * `stream` - writer/sink to serialize image into
 /// * `image` - image to serialize
+/// * `callback` - callback called when a row has been rendered
 ///
 /// # Example
 ///
 /// ```
 /// use raytrust::{Image, write_pgm};
 /// let image = Image::new(8, 8);
-/// write_pgm(&mut std::io::stdout(), &image);
+/// write_pgm(&mut std::io::stdout(), &image, |_: usize| ());
 /// ```
-pub fn write_pgm(stream: &mut (dyn io::Write), image: &Image) -> Result<(), io::Error> {
-    let pb = indicatif::ProgressBar::new_spinner().with_message("Saving image");
+pub fn write_pgm<F>(
+    stream: &mut (dyn io::Write),
+    image: &Image,
+    mut callback: F,
+) -> Result<(), io::Error>
+where
+    F: FnMut(usize),
+{
     writeln!(stream, "P3")?;
     writeln!(stream, "{} {}", image.width(), image.height())?;
     writeln!(stream, "255")?;
-    for row in image {
+    for (y, row) in image.iter().enumerate() {
         for pixel in row {
             writeln!(
                 stream,
@@ -97,9 +105,8 @@ pub fn write_pgm(stream: &mut (dyn io::Write), image: &Image) -> Result<(), io::
                 ((pixel.b * 255.0).round() as u8)
             )?;
         }
-        pb.tick();
+        callback(y + 1);
     }
-    pb.finish();
     Ok(())
 }
 
@@ -123,7 +130,7 @@ mod test {
         };
 
         let mut vec: Vec<u8> = Vec::new();
-        write_pgm(&mut vec, &image)?;
+        write_pgm(&mut vec, &image, |_: usize| ())?;
 
         let expected = indoc::indoc! {"
             P3
