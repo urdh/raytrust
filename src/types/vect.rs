@@ -1,4 +1,4 @@
-use core::ops::*;
+use auto_ops::*;
 use std::{f32, fmt};
 
 /// A vector in ℝ³.
@@ -46,90 +46,37 @@ impl fmt::Display for Vect3 {
     }
 }
 
-impl Neg for Vect3 {
-    type Output = Self;
+impl_op_ex!(-|a: &Vect3| -> Vect3 { Vect3::zero() - a });
 
-    fn neg(self) -> Self::Output {
-        Vect3::zero() - self
+impl_op_ex!(+= |a: &mut Vect3, b: &Vect3| { *a = *a + b; });
+impl_op_ex!(+|a: &Vect3, b: &Vect3| -> Vect3 {
+    Vect3 {
+        x: a.x + b.x,
+        y: a.y + b.y,
+        z: a.z + b.z,
     }
-}
+});
 
-impl Add for Vect3 {
-    type Output = Self;
-
-    fn add(self, other: Vect3) -> Self::Output {
-        Vect3 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
+impl_op_ex!(-= |a: &mut Vect3, b: &Vect3| { *a = *a - b; });
+impl_op_ex!(-|a: &Vect3, b: &Vect3| -> Vect3 {
+    Vect3 {
+        x: a.x - b.x,
+        y: a.y - b.y,
+        z: a.z - b.z,
     }
-}
+});
 
-impl AddAssign for Vect3 {
-    fn add_assign(&mut self, other: Vect3) {
-        *self = *self + other
+impl_op_ex!(*= |a: &mut Vect3, b: &f32| { *a = *a * b; });
+impl_op_ex_commutative!(*|a: &Vect3, b: &f32| -> Vect3 {
+    Vect3 {
+        x: a.x * b,
+        y: a.y * b,
+        z: a.z * b,
     }
-}
+});
 
-impl Sub for Vect3 {
-    type Output = Self;
-
-    fn sub(self, other: Vect3) -> Self::Output {
-        Vect3 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
-
-impl SubAssign for Vect3 {
-    fn sub_assign(&mut self, other: Vect3) {
-        *self = *self - other
-    }
-}
-
-impl Mul<f32> for Vect3 {
-    type Output = Self;
-
-    fn mul(self, other: f32) -> Self::Output {
-        Vect3 {
-            x: self.x * other,
-            y: self.y * other,
-            z: self.z * other,
-        }
-    }
-}
-
-impl MulAssign<f32> for Vect3 {
-    fn mul_assign(&mut self, other: f32) {
-        *self = *self * other
-    }
-}
-
-impl Mul<Vect3> for f32 {
-    type Output = Vect3;
-
-    fn mul(self, other: Vect3) -> Self::Output {
-        other * self
-    }
-}
-
-impl Div<f32> for Vect3 {
-    type Output = Self;
-
-    #[allow(clippy::suspicious_arithmetic_impl)]
-    fn div(self, other: f32) -> Self::Output {
-        self * other.recip()
-    }
-}
-
-impl DivAssign<f32> for Vect3 {
-    fn div_assign(&mut self, other: f32) {
-        *self = *self / other
-    }
-}
+impl_op_ex!(/= |a: &mut Vect3, b: &f32| { *a = *a / b; });
+impl_op_ex!(/|a: &Vect3, b: &f32| -> Vect3 { a * b.recip()});
 
 #[cfg(test)]
 mod test {
