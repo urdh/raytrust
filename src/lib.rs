@@ -1,6 +1,7 @@
 use std::io;
 
 mod image;
+mod scene;
 mod types;
 
 pub use image::Image;
