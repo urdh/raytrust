@@ -3,6 +3,7 @@ mod point;
 mod ray;
 mod vect;
 
-pub(crate) use point::Point3;
-pub(crate) use ray::Ray;
-pub(crate) use vect::Vect3;
+// Exports.
+pub use point::Point3;
+pub use ray::Ray;
+pub use vect::Vect3;
