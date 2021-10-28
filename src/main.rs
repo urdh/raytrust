@@ -1,6 +1,6 @@
 use clap::*;
 use core::result::Result;
-use raytrust::{render, write_pgm};
+use raytrust::{get_scene, render, write_pgm};
 use std::{fs, io, str::FromStr};
 
 fn main() -> Result<(), io::Error> {
@@ -32,7 +32,7 @@ fn main() -> Result<(), io::Error> {
         render_pb.set_message(format!("Rendered line {}/{}", row, height));
         render_pb.tick()
     };
-    let image = render(width, height, render_cb);
+    let image = render(&get_scene(), width, height, render_cb);
     render_pb.finish_with_message(format!("{} lines rendered!", height));
 
     // Write to file

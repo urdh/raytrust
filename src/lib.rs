@@ -28,14 +28,38 @@ fn render_ray(ray: &Ray, scene: &Scene) -> image::Pixel {
     }
 }
 
+/// Get a sample scene containing sample surfaces.
+pub fn get_scene() -> Scene {
+    Scene {
+        surfaces: vec![
+            Surface::Sphere(Sphere {
+                center: Point3 {
+                    z: -1.0,
+                    ..Point3::zero()
+                },
+                radius: 0.5,
+            }),
+            Surface::Sphere(Sphere {
+                center: Point3 {
+                    y: -100.5,
+                    z: -1.0,
+                    ..Point3::zero()
+                },
+                radius: 100.0,
+            }),
+        ],
+    }
+}
+
 /// Render an image by raytracing.
 ///
 /// # Arguments
 ///
+/// * `scene` - scene to render
 /// * `width` - output image width
 /// * `height` - output image height
 /// * `callback` - callback called when a row has been rendered
-pub fn render<F>(width: usize, height: usize, mut callback: F) -> Image
+pub fn render<F>(scene: &Scene, width: usize, height: usize, mut callback: F) -> Image
 where
     F: FnMut(usize),
 {
@@ -66,27 +90,6 @@ where
             ..Vect3::zero()
         };
 
-    // The scene (just a simple sphere)
-    let scene = Scene {
-        surfaces: vec![
-            Surface::Sphere(Sphere {
-                center: Point3 {
-                    z: -1.0,
-                    ..Point3::zero()
-                },
-                radius: 0.5,
-            }),
-            Surface::Sphere(Sphere {
-                center: Point3 {
-                    y: -100.5,
-                    z: -1.0,
-                    ..Point3::zero()
-                },
-                radius: 100.0,
-            }),
-        ],
-    };
-
     // Render the image!
     for (y, row) in image.iter_mut().rev().enumerate() {
         for (x, pixel) in row.iter_mut().enumerate() {
@@ -94,7 +97,7 @@ where
             let v = (y as f32) / ((height as f32) - 1.0);
             let dir = lower_left_corner + (u * horiz) + (v * vert) - origin;
             let ray = Ray::new(origin, dir);
-            *pixel = render_ray(&ray, &scene);
+            *pixel = render_ray(&ray, scene);
         }
         callback(height - y);
     }
