@@ -5,12 +5,12 @@ mod scene;
 mod types;
 
 pub use image::Image;
-use scene::{intersects, Object, Sphere};
+use scene::{intersects, Surface, Sphere};
 use types::{Point3, Ray, Vect3};
 
 /// Render the color for a specific pixel.
-fn render_ray(ray: &Ray, object: &Object) -> image::Pixel {
-    if intersects(ray, object) {
+fn render_ray(ray: &Ray, surface: &Surface) -> image::Pixel {
+    if intersects(ray, surface) {
         return image::Pixel {
             r: 1.0,
             ..image::Pixel::default()
@@ -63,7 +63,7 @@ where
         };
 
     // The scene (just a simple sphere)
-    let sphere = Object::Sphere(Sphere {
+    let sphere = Surface::Sphere(Sphere {
         center: Point3 {
             z: -1.0,
             ..Point3::zero()
