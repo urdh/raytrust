@@ -68,13 +68,23 @@ where
 
     // The scene (just a simple sphere)
     let scene = Scene {
-        surfaces: vec![Surface::Sphere(Sphere {
-            center: Point3 {
-                z: -1.0,
-                ..Point3::zero()
-            },
-            radius: 0.5,
-        })],
+        surfaces: vec![
+            Surface::Sphere(Sphere {
+                center: Point3 {
+                    z: -1.0,
+                    ..Point3::zero()
+                },
+                radius: 0.5,
+            }),
+            Surface::Sphere(Sphere {
+                center: Point3 {
+                    y: -100.5,
+                    z: -1.0,
+                    ..Point3::zero()
+                },
+                radius: 100.0,
+            }),
+        ],
     };
 
     // Render the image!
