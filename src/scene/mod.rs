@@ -6,6 +6,7 @@ pub use sphere::Sphere;
 
 // Imports.
 use crate::types::{Point3, Ray, Vect3};
+use std::ops::Range;
 
 /// An intersectable surface.
 #[non_exhaustive]
@@ -46,14 +47,41 @@ impl Intersection {
 ///
 /// * `ray` - the ray to trace along
 /// * `surface` - the surface to intersect
-pub fn intersects(ray: &Ray, surface: &Surface) -> Option<Intersection> {
-    match surface {
+/// * `filter` - a distance range in which to intersect
+pub fn intersects(ray: &Ray, surface: &Surface, filter: Range<f32>) -> Option<Intersection> {
+    let intersection = match surface {
         Surface::Sphere(s) => s.intersected_by(ray),
-    }
+    };
+    intersection.filter(|i| filter.contains(&(i.point() - ray.origin()).norm()))
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use pretty_assertions::*;
+    use pretty_assertions::{assert_eq, assert_ne};
+
+    #[test]
+    fn test_intersection_filter() {
+        let sphere = Sphere {
+            center: Point3 {
+                z: 2.0,
+                ..Point3::zero()
+            },
+            radius: 1.0,
+        };
+        let ray = Ray::new(
+            Point3::zero(),
+            Vect3 {
+                z: 1.0,
+                ..Vect3::zero()
+            },
+        );
+
+        assert_ne!(
+            intersects(&ray, &Surface::Sphere(sphere), 0.0..f32::INFINITY),
+            None
+        );
+        assert_eq!(intersects(&ray, &Surface::Sphere(sphere), 0.0..0.5), None);
+        assert_eq!(intersects(&ray, &Surface::Sphere(sphere), 1.5..2.0), None);
+    }
 }
