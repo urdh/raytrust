@@ -10,7 +10,7 @@ use types::{Point3, Ray, Vect3};
 
 /// Render the color for a specific pixel.
 fn render_ray(ray: &Ray, surface: &Surface) -> image::Pixel {
-    if let Some(intersection) = intersects(ray, surface) {
+    if let Some(intersection) = intersects(ray, surface, 0.0..f32::INFINITY) {
         // We have an intersection! Map the normal to colors.
         image::Pixel {
             r: 0.5 * (intersection.normal().x + 1.0),
