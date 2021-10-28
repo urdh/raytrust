@@ -1,5 +1,5 @@
-use crate::types::{Point3, Ray};
 use super::Intersection;
+use crate::types::{Point3, Ray};
 
 /// An intersectable sphere.
 #[derive(Debug, Clone, Copy, PartialEq)]
