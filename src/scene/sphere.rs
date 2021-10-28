@@ -1,6 +1,5 @@
-use std::f32::INFINITY;
-
 use crate::types::{Point3, Ray};
+use super::Intersection;
 
 /// An intersectable sphere.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -15,7 +14,7 @@ impl Sphere {
     /// # Arguments
     ///
     /// * `ray` - ray to trace along
-    pub fn intersected_by(&self, ray: &Ray) -> bool {
+    pub fn intersected_by(&self, ray: &Ray) -> Option<Intersection> {
         let offset = ray.origin() - self.center;
         // Solving ax² + 2bx + c = r², where the constants are derived
         // from expanding `(ray.at(x) - self.center)² = self.radius²`.
@@ -24,8 +23,16 @@ impl Sphere {
         let c = offset.dot(offset) - (self.radius * self.radius);
         // If the smallest non-imaginary solution is positive, we have
         // intersected with the outside of the shpere.
-        let distance = (-b - ((b * b) - (a * c)).sqrt()) / (2.0 * a);
-        distance > 0.0
+        let distance = (-b - ((b * b) - (a * c)).sqrt()) / a;
+        if distance > 0.0 {
+            // Intersection! Return a point and normal.
+            let point = ray.at(distance);
+            let normal = point - self.center;
+            Some(Intersection::new(point, normal))
+        } else {
+            // No intersection :(
+            None
+        }
     }
 }
 
@@ -60,8 +67,8 @@ mod test {
             },
         );
 
-        assert_eq!(sphere.intersected_by(&ray_z), false);
-        assert_eq!(sphere.intersected_by(&ray_x), false);
+        assert_eq!(sphere.intersected_by(&ray_z), None);
+        assert_eq!(sphere.intersected_by(&ray_x), None);
     }
 
     #[test]
@@ -84,7 +91,18 @@ mod test {
             },
         );
 
-        assert_eq!(sphere.intersected_by(&ray), true);
+        let expected = Intersection::new(
+            Point3 {
+                x: 1.0,
+                y: 0.0,
+                z: 2.0,
+            },
+            Vect3 {
+                x: 1.0,
+                ..Vect3::zero()
+            },
+        );
+        assert_eq!(sphere.intersected_by(&ray), Some(expected));
     }
 
     #[test]
@@ -104,6 +122,17 @@ mod test {
             },
         );
 
-        assert_eq!(sphere.intersected_by(&ray), true);
+        let expected = Intersection::new(
+            Point3 {
+                x: 0.0,
+                y: 0.0,
+                z: 1.0,
+            },
+            Vect3 {
+                z: -1.0,
+                ..Vect3::zero()
+            },
+        );
+        assert_eq!(sphere.intersected_by(&ray), Some(expected));
     }
 }
