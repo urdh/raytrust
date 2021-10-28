@@ -5,12 +5,12 @@ mod scene;
 mod types;
 
 pub use image::Image;
-use scene::{intersects, Surface, Sphere};
+use scene::{intersects, Scene, Sphere, Surface};
 use types::{Point3, Ray, Vect3};
 
 /// Render the color for a specific pixel.
-fn render_ray(ray: &Ray, surface: &Surface) -> image::Pixel {
-    if let Some(intersection) = intersects(ray, surface, 0.0..f32::INFINITY) {
+fn render_ray(ray: &Ray, scene: &Scene) -> image::Pixel {
+    if let Some(intersection) = intersects(ray, scene, 0.0..f32::INFINITY) {
         // We have an intersection! Map the normal to colors.
         image::Pixel {
             r: 0.5 * (intersection.normal().x + 1.0),
@@ -67,13 +67,15 @@ where
         };
 
     // The scene (just a simple sphere)
-    let sphere = Surface::Sphere(Sphere {
-        center: Point3 {
-            z: -1.0,
-            ..Point3::zero()
-        },
-        radius: 0.5,
-    });
+    let scene = Scene {
+        surfaces: vec![Surface::Sphere(Sphere {
+            center: Point3 {
+                z: -1.0,
+                ..Point3::zero()
+            },
+            radius: 0.5,
+        })],
+    };
 
     // Render the image!
     for (y, row) in image.iter_mut().rev().enumerate() {
@@ -82,7 +84,7 @@ where
             let v = (y as f32) / ((height as f32) - 1.0);
             let dir = lower_left_corner + (u * horiz) + (v * vert) - origin;
             let ray = Ray::new(origin, dir);
-            *pixel = render_ray(&ray, &sphere);
+            *pixel = render_ray(&ray, &scene);
         }
         callback(height - y);
     }
