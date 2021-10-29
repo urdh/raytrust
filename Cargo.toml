@@ -11,6 +11,7 @@ publish = false
 clap = { version = "2.33", features = ["yaml"]}
 auto_ops = "0.3"
 indicatif = "0.16"
+rand = "0.8"
 
 [dev-dependencies]
 pretty_assertions = "1.0"
