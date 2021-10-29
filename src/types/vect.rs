@@ -38,6 +38,11 @@ impl Vect3 {
     pub fn normalize(self) -> Vect3 {
         self / self.norm()
     }
+
+    /// Project a vector onto this vector.
+    pub fn project(self, other: Vect3) -> Vect3 {
+        (self.dot(other) / self.dot(self)) * self
+    }
 }
 
 impl fmt::Display for Vect3 {

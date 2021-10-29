@@ -1,9 +1,11 @@
 use std::io;
 
+mod camera;
 mod image;
 mod scene;
 mod types;
 
+use camera::Camera;
 pub use image::Image;
 use scene::{intersects, Scene, Sphere, Surface};
 use types::{Point3, Ray, Vect3};
@@ -66,38 +68,23 @@ where
     let mut image = Image::new(width, height);
 
     // Viewport & focal length
-    let viewport_height = 2.0;
-    let viewport_width = (width as f32 / height as f32) * viewport_height;
+    let aspect_ratio = width as f32 / height as f32;
+    let viewport = (2.0 * aspect_ratio, 2.0);
     let focal_length = 1.0;
 
-    // Camera position, horizontal & vertical viewport extents
-    let origin = Point3::zero();
-    let horiz = Vect3 {
-        x: viewport_width,
+    // Camera definition
+    let direction = Vect3 {
+        z: 1.0,
         ..Vect3::zero()
     };
-    let vert = Vect3 {
-        y: viewport_height,
-        ..Vect3::zero()
-    };
-
-    // Lower left corner of the camera view
-    let lower_left_corner = origin
-        - (horiz / 2.0)
-        - (vert / 2.0)
-        - Vect3 {
-            z: focal_length,
-            ..Vect3::zero()
-        };
+    let camera = Camera::new(Point3::zero(), direction, focal_length, viewport);
 
     // Render the image!
     for (y, row) in image.iter_mut().rev().enumerate() {
         for (x, pixel) in row.iter_mut().enumerate() {
             let u = (x as f32) / ((width as f32) - 1.0);
             let v = (y as f32) / ((height as f32) - 1.0);
-            let dir = lower_left_corner + (u * horiz) + (v * vert) - origin;
-            let ray = Ray::new(origin, dir);
-            *pixel = render_ray(&ray, scene);
+            *pixel = render_ray(&camera.ray(u, v), scene);
         }
         callback(height - y);
     }
