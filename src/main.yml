@@ -16,3 +16,8 @@ args:
         long: height
         takes_value: true
         default_value: "450"
+    - samples:
+        help: samples per pixel
+        long: samples
+        takes_value: true
+        default_value: "10"

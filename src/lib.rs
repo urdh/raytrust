@@ -61,8 +61,15 @@ pub fn get_scene() -> Scene {
 /// * `scene` - scene to render
 /// * `width` - output image width
 /// * `height` - output image height
+/// * `samples` - samples per pixel
 /// * `callback` - callback called when a row has been rendered
-pub fn render<F>(scene: &Scene, width: usize, height: usize, mut callback: F) -> Image
+pub fn render<F>(
+    scene: &Scene,
+    width: usize,
+    height: usize,
+    samples: usize,
+    mut callback: F,
+) -> Image
 where
     F: FnMut(usize),
 {
@@ -82,10 +89,9 @@ where
     let camera = Camera::new(Point3::zero(), direction, focal_length, viewport);
 
     // Render the image!
-    let samples_per_pixel = 100;
     for (y, row) in image.iter_mut().rev().enumerate() {
         for (x, pixel) in row.iter_mut().enumerate() {
-            let acc = (0..samples_per_pixel)
+            let acc = (0..samples)
                 .map(|_| {
                     let u = ((x as f32) + rng.gen_range(0.0..1.0)) / ((width as f32) - 1.0);
                     let v = ((y as f32) + rng.gen_range(0.0..1.0)) / ((height as f32) - 1.0);
@@ -97,9 +103,9 @@ where
                     b: acc.b + pixel.b,
                 });
             *pixel = image::Pixel {
-                r: acc.r / (samples_per_pixel as f32),
-                g: acc.g / (samples_per_pixel as f32),
-                b: acc.b / (samples_per_pixel as f32),
+                r: acc.r / (samples as f32),
+                g: acc.g / (samples as f32),
+                b: acc.b / (samples as f32),
             };
         }
         callback(height - y);
