@@ -1,4 +1,4 @@
-use crate::scene::Intersection;
+use super::{Intersection, Surface};
 use crate::types::{Point3, Ray};
 
 /// An intersectable sphere.
@@ -8,13 +8,13 @@ pub struct Sphere {
     pub radius: f32,
 }
 
-impl Sphere {
+impl Surface for Sphere {
     /// Check whether a ray intersects this sphere.
     ///
     /// # Arguments
     ///
     /// * `ray` - ray to trace along
-    pub fn intersected_by(&self, ray: &Ray) -> Option<Intersection> {
+    fn intersected_by(&self, ray: &Ray) -> Option<Intersection> {
         let offset = ray.origin() - self.center;
         // Solving ax² + 2bx + c = r², where the constants are derived
         // from expanding `(ray.at(x) - self.center)² = self.radius²`.

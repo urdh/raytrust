@@ -1,38 +1,12 @@
 // Imports.
 use crate::surfaces::*;
-use crate::types::{Point3, Ray, Vect3};
+use crate::types::Ray;
 use std::cmp::Ordering;
 use std::ops::Range;
 
-/// An intersection.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Intersection {
-    point: Point3,
-    normal: Vect3,
-}
-
-impl Intersection {
-    /// Construct an intersection.
-    pub(crate) fn new(point: Point3, normal: Vect3) -> Intersection {
-        Intersection {
-            point,
-            normal: normal.normalize(),
-        }
-    }
-
-    /// Get the point of this intersection.
-    pub fn point(&self) -> Point3 {
-        self.point
-    }
-    /// Get the normal of this intersection.
-    pub fn normal(&self) -> Vect3 {
-        self.normal
-    }
-}
-
 /// A full, renderable "scene".
 pub struct Scene {
-    pub surfaces: Vec<Surface>,
+    pub surfaces: Vec<Box<dyn Surface>>,
 }
 
 /// Check whether a ray intersects any surface in a scene.
@@ -46,9 +20,7 @@ pub fn intersects(ray: &Ray, scene: &Scene, filter: Range<f32>) -> Option<Inters
     scene
         .surfaces
         .iter()
-        .filter_map(|surface| match surface {
-            Surface::Sphere(s) => s.intersected_by(ray),
-        })
+        .filter_map(|surface| surface.intersected_by(ray))
         .map(|match_| (match_, (match_.point() - ray.origin()).norm()))
         .filter(|(_, distance)| filter.contains(distance))
         .min_by(|(_, a), (_, b)| match (a.is_nan(), b.is_nan()) {
@@ -63,6 +35,7 @@ pub fn intersects(ray: &Ray, scene: &Scene, filter: Range<f32>) -> Option<Inters
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::types::{Point3, Vect3};
     use pretty_assertions::{assert_eq, assert_ne};
 
     #[test]
@@ -83,7 +56,7 @@ mod test {
         );
 
         let scene = Scene {
-            surfaces: vec![Surface::Sphere(sphere)],
+            surfaces: vec![Box::new(sphere)],
         };
         assert_ne!(intersects(&ray, &scene, 0.0..f32::INFINITY), None);
         assert_eq!(intersects(&ray, &scene, 0.0..0.5), None);
@@ -115,7 +88,7 @@ mod test {
         );
 
         let scene = Scene {
-            surfaces: vec![Surface::Sphere(sphere_a), Surface::Sphere(sphere_b)],
+            surfaces: vec![Box::new(sphere_a), Box::new(sphere_b)],
         };
         assert_eq!(
             intersects(&ray, &scene, 0.0..f32::INFINITY).map(|match_| match_.point()),
