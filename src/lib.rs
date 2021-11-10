@@ -10,7 +10,7 @@ mod types;
 use camera::Camera;
 pub use image::Image;
 use scene::{intersects, Scene};
-use surfaces::{Sphere, Surface};
+use surfaces::Sphere;
 use types::{Point3, Ray, Vect3};
 
 /// Render the color for a specific pixel.
@@ -37,14 +37,14 @@ fn render_ray(ray: &Ray, scene: &Scene) -> image::Pixel {
 pub fn get_scene() -> Scene {
     Scene {
         surfaces: vec![
-            Surface::Sphere(Sphere {
+            Box::new(Sphere {
                 center: Point3 {
                     z: -1.0,
                     ..Point3::zero()
                 },
                 radius: 0.5,
             }),
-            Surface::Sphere(Sphere {
+            Box::new(Sphere {
                 center: Point3 {
                     y: -100.5,
                     z: -1.0,
