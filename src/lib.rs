@@ -4,11 +4,13 @@ use std::io;
 mod camera;
 mod image;
 mod scene;
+mod surfaces;
 mod types;
 
 use camera::Camera;
 pub use image::Image;
-use scene::{intersects, Scene, Sphere, Surface};
+use scene::{intersects, Scene};
+use surfaces::{Sphere, Surface};
 use types::{Point3, Ray, Vect3};
 
 /// Render the color for a specific pixel.
