@@ -3,6 +3,7 @@ use std::io;
 
 mod camera;
 mod image;
+mod materials;
 mod scene;
 mod surfaces;
 mod types;

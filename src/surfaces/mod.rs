@@ -26,7 +26,7 @@ pub struct Intersection {
 
 impl Intersection {
     /// Construct an intersection.
-    fn new(point: Point3, normal: Vect3) -> Intersection {
+    pub fn new(point: Point3, normal: Vect3) -> Intersection {
         Intersection {
             point,
             normal: normal.normalize(),
