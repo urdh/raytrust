@@ -1,4 +1,4 @@
-use super::Intersection;
+use crate::scene::Intersection;
 use crate::types::{Point3, Ray};
 
 /// An intersectable sphere.

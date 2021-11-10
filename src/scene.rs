@@ -1,20 +1,8 @@
-/// Surfaces forming part of a renderable scene.
-mod sphere;
-
-// Exports.
-pub use sphere::Sphere;
-
 // Imports.
+use crate::surfaces::*;
 use crate::types::{Point3, Ray, Vect3};
 use std::cmp::Ordering;
 use std::ops::Range;
-
-/// An intersectable surface.
-#[non_exhaustive]
-#[derive(Debug, Clone, Copy)]
-pub enum Surface {
-    Sphere(Sphere),
-}
 
 /// An intersection.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -25,7 +13,7 @@ pub struct Intersection {
 
 impl Intersection {
     /// Construct an intersection.
-    fn new(point: Point3, normal: Vect3) -> Intersection {
+    pub(crate) fn new(point: Point3, normal: Vect3) -> Intersection {
         Intersection {
             point,
             normal: normal.normalize(),
