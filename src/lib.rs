@@ -10,29 +10,9 @@ mod types;
 
 use camera::Camera;
 pub use image::Image;
-use scene::{intersects, Scene};
+use scene::Scene;
 use surfaces::Sphere;
-use types::{Point3, Ray, Vect3};
-
-/// Render the color for a specific pixel.
-fn render_ray(ray: &Ray, scene: &Scene) -> image::Pixel {
-    if let Some(intersection) = intersects(ray, scene, 0.0..f32::INFINITY) {
-        // We have an intersection! Map the normal to colors.
-        image::Pixel {
-            r: 0.5 * (intersection.normal().x + 1.0),
-            g: 0.5 * (intersection.normal().y + 1.0),
-            b: 0.5 * (intersection.normal().z + 1.0),
-        }
-    } else {
-        // Fall-back: fancy blue-ish gradient
-        let t = 0.5 * (ray.direction().y + 1.0);
-        image::Pixel {
-            r: (1.0 - t) * 1.0 + t * 0.5,
-            g: (1.0 - t) * 1.0 + t * 0.7,
-            b: (1.0 - t) * 1.0 + t * 1.0,
-        }
-    }
-}
+use types::{Point3, Vect3};
 
 /// Get a sample scene containing sample surfaces.
 pub fn get_scene() -> Scene {
@@ -98,7 +78,7 @@ where
                 .map(|_| {
                     let u = ((x as f32) + rng.gen_range(0.0..1.0)) / ((width as f32) - 1.0);
                     let v = ((y as f32) + rng.gen_range(0.0..1.0)) / ((height as f32) - 1.0);
-                    render_ray(&camera.ray(u, v), scene)
+                    scene.render_ray(&camera.ray(u, v))
                 })
                 .fold(image::Pixel::default(), |acc, pixel| image::Pixel {
                     r: acc.r + pixel.r,
