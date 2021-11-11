@@ -1,13 +1,20 @@
 // Imports.
 use crate::image;
+use crate::materials::*;
 use crate::surfaces::*;
 use crate::types::Ray;
 use std::cmp::Ordering;
 use std::ops::Range;
 
+/// An object, defined as a surface with a material.
+pub struct Object {
+    pub surface: Box<dyn Surface>,
+    pub material: Box<dyn Material>,
+}
+
 /// A full, renderable "scene".
 pub struct Scene {
-    pub surfaces: Vec<Box<dyn Surface>>,
+    pub objects: Vec<Object>,
 }
 
 impl Ray {
@@ -18,12 +25,21 @@ impl Ray {
     /// * `ray` - the ray to trace along
     /// * `scene` - the scene to intersect in
     /// * `filter` - a distance range in which to intersect
-    fn intersects(&self, scene: &Scene, filter: Range<f32>) -> Option<Intersection> {
+    fn intersects<'a>(
+        &self,
+        scene: &'a Scene,
+        filter: Range<f32>,
+    ) -> Option<(Intersection, &'a dyn Material)> {
         scene
-            .surfaces
+            .objects
             .iter()
-            .filter_map(|surface| surface.intersected_by(self))
-            .map(|match_| (match_, (match_.point() - self.origin()).norm()))
+            .filter_map(|object| {
+                object
+                    .surface
+                    .intersected_by(self)
+                    .map(|intersection| (intersection, &*object.material))
+            })
+            .map(|match_| (match_, (match_.0.point() - self.origin()).norm()))
             .filter(|(_, distance)| filter.contains(distance))
             .min_by(|(_, a), (_, b)| match (a.is_nan(), b.is_nan()) {
                 (true, true) => Ordering::Equal,
@@ -47,13 +63,10 @@ impl Scene {
             // We reached the recusion depth. Return a black pixel.
             return image::Pixel::default();
         }
-        if let Some(intersection) = ray.intersects(self, 0.0..f32::INFINITY) {
-            // We have an intersection! Map the normal to colors.
-            image::Pixel {
-                r: 0.5 * (intersection.normal().x + 1.0),
-                g: 0.5 * (intersection.normal().y + 1.0),
-                b: 0.5 * (intersection.normal().z + 1.0),
-            }
+        if let Some((intersection, material)) = ray.intersects(self, 0.001..f32::INFINITY) {
+            // We have an intersection! Recurse, then absorb part of the color.
+            let reflected = material.reflect_at(ray, &intersection);
+            material.absorb(&self.render_ray(&reflected, depth - 1))
         } else {
             // Fall-back: fancy blue-ish gradient
             let t = 0.5 * (ray.direction().y + 1.0);
@@ -70,10 +83,11 @@ impl Scene {
 mod test {
     use super::*;
     use crate::types::{Point3, Vect3};
-    use pretty_assertions::{assert_eq, assert_ne};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_intersection_filter() {
+        let material = Lambertian { absorption: 1.0 };
         let sphere = Sphere {
             center: Point3 {
                 z: 2.0,
@@ -90,15 +104,19 @@ mod test {
         );
 
         let scene = Scene {
-            surfaces: vec![Box::new(sphere)],
+            objects: vec![Object {
+                surface: Box::new(sphere),
+                material: Box::new(material),
+            }],
         };
-        assert_ne!(ray.intersects(&scene, 0.0..f32::INFINITY), None);
-        assert_eq!(ray.intersects(&scene, 0.0..0.5), None);
-        assert_eq!(ray.intersects(&scene, 1.5..2.0), None);
+        assert!(ray.intersects(&scene, 0.0..f32::INFINITY).is_some());
+        assert!(ray.intersects(&scene, 0.0..0.5).is_none());
+        assert!(ray.intersects(&scene, 1.5..2.0).is_none());
     }
 
     #[test]
     fn test_multiple_objects() {
+        let material = Lambertian { absorption: 1.0 };
         let sphere_a = Sphere {
             center: Point3 {
                 z: 2.0,
@@ -122,11 +140,20 @@ mod test {
         );
 
         let scene = Scene {
-            surfaces: vec![Box::new(sphere_a), Box::new(sphere_b)],
+            objects: vec![
+                Object {
+                    surface: Box::new(sphere_a),
+                    material: Box::new(material),
+                },
+                Object {
+                    surface: Box::new(sphere_b),
+                    material: Box::new(material),
+                },
+            ],
         };
         assert_eq!(
             ray.intersects(&scene, 0.0..f32::INFINITY)
-                .map(|match_| match_.point()),
+                .map(|(intersection, _)| intersection.point()),
             Some(Point3 {
                 z: 1.0,
                 ..Point3::zero()
@@ -134,7 +161,7 @@ mod test {
         );
         assert_eq!(
             ray.intersects(&scene, 2.0..f32::INFINITY)
-                .map(|match_| match_.point()),
+                .map(|(intersection, _)| intersection.point()),
             Some(Point3 {
                 z: 3.0,
                 ..Point3::zero()
