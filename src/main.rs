@@ -28,12 +28,13 @@ fn main() -> Result<(), io::Error> {
     let width = usize::from_str(matches.value_of("width").unwrap()).unwrap();
     let height = usize::from_str(matches.value_of("height").unwrap()).unwrap();
     let samples = usize::from_str(matches.value_of("samples").unwrap()).unwrap();
+    let depth = usize::from_str(matches.value_of("depth").unwrap()).unwrap();
     let render_pb = indicatif::ProgressBar::new_spinner().with_message("Rendering image");
     let render_cb = |row: usize| {
         render_pb.set_message(format!("Rendered line {}/{}", row, height));
         render_pb.tick()
     };
-    let image = render(&get_scene(), width, height, samples, render_cb);
+    let image = render(&get_scene(), width, height, samples, depth, render_cb);
     render_pb.finish_with_message(format!("{} lines rendered!", height));
 
     // Write to file
