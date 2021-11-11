@@ -45,12 +45,14 @@ pub fn get_scene() -> Scene {
 /// * `width` - output image width
 /// * `height` - output image height
 /// * `samples` - samples per pixel
+/// * `depth` - recursion depth
 /// * `callback` - callback called when a row has been rendered
 pub fn render<F>(
     scene: &Scene,
     width: usize,
     height: usize,
     samples: usize,
+    depth: usize,
     mut callback: F,
 ) -> Image
 where
@@ -78,7 +80,7 @@ where
                 .map(|_| {
                     let u = ((x as f32) + rng.gen_range(0.0..1.0)) / ((width as f32) - 1.0);
                     let v = ((y as f32) + rng.gen_range(0.0..1.0)) / ((height as f32) - 1.0);
-                    scene.render_ray(&camera.ray(u, v))
+                    scene.render_ray(&camera.ray(u, v), depth)
                 })
                 .fold(image::Pixel::default(), |acc, pixel| image::Pixel {
                     r: acc.r + pixel.r,

@@ -21,3 +21,8 @@ args:
         long: samples
         takes_value: true
         default_value: "10"
+    - depth:
+        help: recursion depth
+        long: depth
+        takes_value: true
+        default_value: "50"

@@ -41,7 +41,12 @@ impl Scene {
     /// # Arguments
     ///
     /// * `ray` - the ray to trace along
-    pub fn render_ray(&self, ray: &Ray) -> image::Pixel {
+    /// * `depth` - max number of reflections
+    pub fn render_ray(&self, ray: &Ray, depth: usize) -> image::Pixel {
+        if depth == 0 {
+            // We reached the recusion depth. Return a black pixel.
+            return image::Pixel::default();
+        }
         if let Some(intersection) = ray.intersects(self, 0.0..f32::INFINITY) {
             // We have an intersection! Map the normal to colors.
             image::Pixel {
