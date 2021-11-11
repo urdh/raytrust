@@ -10,30 +10,36 @@ mod types;
 
 use camera::Camera;
 pub use image::Image;
-use scene::Scene;
+use materials::{Hemispherical, Lambertian};
+use scene::{Object, Scene};
 use surfaces::Sphere;
 use types::{Point3, Vect3};
 
 /// Get a sample scene containing sample surfaces.
 pub fn get_scene() -> Scene {
+    let sphere = Object {
+        surface: Box::new(Sphere {
+            center: Point3 {
+                z: -1.0,
+                ..Point3::zero()
+            },
+            radius: 0.5,
+        }),
+        material: Box::new(Lambertian { absorption: 0.5 }),
+    };
+    let ground = Object {
+        surface: Box::new(Sphere {
+            center: Point3 {
+                y: -100.5,
+                z: -1.0,
+                ..Point3::zero()
+            },
+            radius: 100.0,
+        }),
+        material: Box::new(Hemispherical { absorption: 0.5 }),
+    };
     Scene {
-        surfaces: vec![
-            Box::new(Sphere {
-                center: Point3 {
-                    z: -1.0,
-                    ..Point3::zero()
-                },
-                radius: 0.5,
-            }),
-            Box::new(Sphere {
-                center: Point3 {
-                    y: -100.5,
-                    z: -1.0,
-                    ..Point3::zero()
-                },
-                radius: 100.0,
-            }),
-        ],
+        objects: vec![sphere, ground],
     }
 }
 
