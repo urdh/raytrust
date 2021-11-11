@@ -111,6 +111,7 @@ where
 ///
 /// * `stream` - writer/sink to serialize image into
 /// * `image` - image to serialize
+/// * `gamma` - gamma correction to apply
 /// * `callback` - callback called when a row has been rendered
 ///
 /// # Example
@@ -118,11 +119,12 @@ where
 /// ```
 /// use raytrust::{Image, write_pgm};
 /// let image = Image::new(8, 8);
-/// write_pgm(&mut std::io::stdout(), &image, |_: usize| ());
+/// write_pgm(&mut std::io::stdout(), &image, 2.2, |_: usize| ());
 /// ```
 pub fn write_pgm<F>(
     stream: &mut (dyn io::Write),
     image: &Image,
+    gamma: f32,
     mut callback: F,
 ) -> Result<(), io::Error>
 where
@@ -136,9 +138,9 @@ where
             writeln!(
                 stream,
                 "{} {} {}",
-                ((pixel.r * 255.0).round() as u8),
-                ((pixel.g * 255.0).round() as u8),
-                ((pixel.b * 255.0).round() as u8)
+                ((pixel.r.powf(gamma.recip()) * 255.0).round() as u8),
+                ((pixel.g.powf(gamma.recip()) * 255.0).round() as u8),
+                ((pixel.b.powf(gamma.recip()) * 255.0).round() as u8)
             )?;
         }
         callback(y + 1);
@@ -166,7 +168,7 @@ mod test {
         };
 
         let mut vec: Vec<u8> = Vec::new();
-        write_pgm(&mut vec, &image, |_: usize| ())?;
+        write_pgm(&mut vec, &image, 1.0, |_: usize| ())?;
 
         let expected = indoc::indoc! {"
             P3
