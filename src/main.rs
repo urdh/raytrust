@@ -40,7 +40,7 @@ fn main() -> Result<(), io::Error> {
     // Write to file
     let save_pb = indicatif::ProgressBar::new_spinner().with_message("Saving image");
     let save_cb = |_: usize| save_pb.tick();
-    write_pgm(&mut *output, &image, save_cb)?;
+    write_pgm(&mut *output, &image, 2.2, save_cb)?;
     save_pb.finish_with_message("Image saved!");
 
     Ok(())
