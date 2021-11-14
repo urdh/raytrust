@@ -39,16 +39,8 @@ mod test {
 
     #[test]
     fn test_ray_at() {
-        let origin = Point3 {
-            x: 1.0,
-            y: 0.0,
-            z: -1.0,
-        };
-        let direction = Vect3 {
-            x: 0.0,
-            y: 1.0,
-            z: 1.0,
-        };
+        let origin = Point3(1.0, 0.0, -1.0);
+        let direction = Vect3(0.0, 1.0, 1.0);
 
         let ray = Ray::new(origin, direction);
         assert_ulps_eq!(ray.at(0.0), origin);

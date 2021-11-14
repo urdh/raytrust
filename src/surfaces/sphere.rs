@@ -46,26 +46,11 @@ mod test {
     #[test]
     fn test_no_intersections() {
         let sphere = Sphere {
-            center: Point3 {
-                z: 2.0,
-                ..Point3::zero()
-            },
+            center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
         };
-        let ray_z = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                z: -1.0,
-                ..Vect3::zero()
-            },
-        );
-        let ray_x = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                x: -1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray_z = Ray::new(Point3::zero(), Vect3(0.0, 0.0, -1.0));
+        let ray_x = Ray::new(Point3::zero(), Vect3(-1.0, 0.0, 0.0));
 
         assert_eq!(sphere.intersected_by(&ray_z), None);
         assert_eq!(sphere.intersected_by(&ray_x), None);
@@ -74,65 +59,24 @@ mod test {
     #[test]
     fn test_one_intersection() {
         let sphere = Sphere {
-            center: Point3 {
-                z: 2.0,
-                ..Point3::zero()
-            },
+            center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
         };
-        let ray = Ray::new(
-            Point3 {
-                x: 1.0,
-                ..Point3::zero()
-            },
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray = Ray::new(Point3(1.0, 0.0, 0.0), Vect3(0.0, 0.0, 1.0));
 
-        let expected = Intersection::new(
-            Point3 {
-                x: 1.0,
-                y: 0.0,
-                z: 2.0,
-            },
-            Vect3 {
-                x: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let expected = Intersection::new(Point3(1.0, 0.0, 2.0), Vect3(1.0, 0.0, 0.0));
         assert_eq!(sphere.intersected_by(&ray), Some(expected));
     }
 
     #[test]
     fn test_two_intersections() {
         let sphere = Sphere {
-            center: Point3 {
-                z: 2.0,
-                ..Point3::zero()
-            },
+            center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
         };
-        let ray = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
 
-        let expected = Intersection::new(
-            Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: 1.0,
-            },
-            Vect3 {
-                z: -1.0,
-                ..Vect3::zero()
-            },
-        );
+        let expected = Intersection::new(Point3(0.0, 0.0, 1.0), Vect3(0.0, 0.0, -1.0));
         assert_eq!(sphere.intersected_by(&ray), Some(expected));
     }
 }

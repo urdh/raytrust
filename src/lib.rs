@@ -22,11 +22,7 @@ pub fn get_scene() -> Scene {
             // Left side metal sphere.
             Object {
                 surface: Box::new(Sphere {
-                    center: Point3 {
-                        x: -1.0,
-                        z: -1.0,
-                        ..Point3::zero()
-                    },
+                    center: Point3(-1.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
                 material: Box::new(Metal::new(0.8, 0.8, 0.8, 0.3)),
@@ -34,10 +30,7 @@ pub fn get_scene() -> Scene {
             // Center diffuse sphere.
             Object {
                 surface: Box::new(Sphere {
-                    center: Point3 {
-                        z: -1.0,
-                        ..Point3::zero()
-                    },
+                    center: Point3(0.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
                 material: Box::new(Lambertian::new(0.7, 0.3, 0.3)),
@@ -45,11 +38,7 @@ pub fn get_scene() -> Scene {
             // Right side metal sphere.
             Object {
                 surface: Box::new(Sphere {
-                    center: Point3 {
-                        x: 1.0,
-                        z: -1.0,
-                        ..Point3::zero()
-                    },
+                    center: Point3(1.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
                 material: Box::new(Metal::new(0.8, 0.6, 0.2, 1.0)),
@@ -57,11 +46,7 @@ pub fn get_scene() -> Scene {
             // "Ground" sphere.
             Object {
                 surface: Box::new(Sphere {
-                    center: Point3 {
-                        y: -100.5,
-                        z: -1.0,
-                        ..Point3::zero()
-                    },
+                    center: Point3(0.0, -100.5, -1.0),
                     radius: 100.0,
                 }),
                 material: Box::new(Hemispherical::new(0.8, 0.8, 0.0)),
@@ -100,10 +85,7 @@ where
     let focal_length = 1.0;
 
     // Camera definition
-    let direction = Vect3 {
-        z: 1.0,
-        ..Vect3::zero()
-    };
+    let direction = Vect3(0.0, 0.0, 1.0);
     let camera = Camera::new(Point3::zero(), direction, focal_length, viewport);
 
     // Render the image!

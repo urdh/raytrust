@@ -93,7 +93,7 @@ impl Scene {
             }
         } else {
             // Fall-back: fancy blue-ish gradient
-            let t = 0.5 * (ray.direction().y + 1.0);
+            let t = 0.5 * (ray.direction().z() + 1.0);
             image::Pixel {
                 r: (1.0 - t) * 1.0 + t * 0.5,
                 g: (1.0 - t) * 1.0 + t * 0.7,
@@ -113,19 +113,10 @@ mod test {
     fn test_intersection_filter() {
         let material = Lambertian::new(1.0, 1.0, 1.0);
         let sphere = Sphere {
-            center: Point3 {
-                z: 2.0,
-                ..Point3::zero()
-            },
+            center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
         };
-        let ray = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
 
         let scene = Scene {
             objects: vec![Object {
@@ -142,26 +133,14 @@ mod test {
     fn test_multiple_objects() {
         let material = Lambertian::new(1.0, 1.0, 1.0);
         let sphere_a = Sphere {
-            center: Point3 {
-                z: 2.0,
-                ..Point3::zero()
-            },
+            center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
         };
         let sphere_b = Sphere {
-            center: Point3 {
-                z: 4.0,
-                ..Point3::zero()
-            },
+            center: Point3(0.0, 0.0, 4.0),
             radius: 1.0,
         };
-        let ray = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
 
         let scene = Scene {
             objects: vec![
@@ -178,18 +157,12 @@ mod test {
         assert_eq!(
             ray.intersects(&scene, 0.0..f32::INFINITY)
                 .map(|(intersection, _)| intersection.point()),
-            Some(Point3 {
-                z: 1.0,
-                ..Point3::zero()
-            })
+            Some(Point3(0.0, 0.0, 1.0))
         );
         assert_eq!(
             ray.intersects(&scene, 2.0..f32::INFINITY)
                 .map(|(intersection, _)| intersection.point()),
-            Some(Point3 {
-                z: 3.0,
-                ..Point3::zero()
-            })
+            Some(Point3(0.0, 0.0, 3.0))
         );
     }
 }
