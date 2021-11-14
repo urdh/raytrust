@@ -10,7 +10,7 @@ mod types;
 
 use camera::Camera;
 pub use image::Image;
-use materials::{Hemispherical, Lambertian, Metal};
+use materials::{Color, Hemispherical, Lambertian, Metal};
 use scene::{Object, Scene};
 use surfaces::Sphere;
 use types::{Point3, Vect3};
@@ -25,7 +25,7 @@ pub fn get_scene() -> Scene {
                     center: Point3(-1.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
-                material: Box::new(Metal::new(0.8, 0.8, 0.8, 0.3)),
+                material: Box::new(Metal::new(Color(0.8, 0.8, 0.8), 0.3)),
             },
             // Center diffuse sphere.
             Object {
@@ -33,7 +33,7 @@ pub fn get_scene() -> Scene {
                     center: Point3(0.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
-                material: Box::new(Lambertian::new(0.7, 0.3, 0.3)),
+                material: Box::new(Lambertian::new(Color(0.7, 0.3, 0.3))),
             },
             // Right side metal sphere.
             Object {
@@ -41,7 +41,7 @@ pub fn get_scene() -> Scene {
                     center: Point3(1.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
-                material: Box::new(Metal::new(0.8, 0.6, 0.2, 1.0)),
+                material: Box::new(Metal::new(Color(0.8, 0.6, 0.2), 1.0)),
             },
             // "Ground" sphere.
             Object {
@@ -49,7 +49,7 @@ pub fn get_scene() -> Scene {
                     center: Point3(0.0, -100.5, -1.0),
                     radius: 100.0,
                 }),
-                material: Box::new(Hemispherical::new(0.8, 0.8, 0.0)),
+                material: Box::new(Hemispherical::new(Color(0.8, 0.8, 0.0))),
             },
         ],
     }

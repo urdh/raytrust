@@ -1,5 +1,4 @@
-use super::Material;
-use crate::image::Pixel;
+use super::{Color, Material};
 use crate::surfaces::Intersection;
 use crate::types::{Point3, Ray, Vect3};
 use rand::{thread_rng, Rng};
@@ -26,20 +25,18 @@ fn rand_point_on_sphere(origin: &Point3, radius: f32) -> Point3 {
 /// A lambertian diffuse material.
 #[derive(Debug, Clone, Copy)]
 pub struct Lambertian {
-    attenuation: Pixel,
+    attenuation: Color,
 }
 
 impl Lambertian {
     /// Construct a colored diffuse material with lambertian reflection.
-    pub fn new(r: f32, g: f32, b: f32) -> Lambertian {
-        Lambertian {
-            attenuation: Pixel(r, g, b),
-        }
+    pub fn new(color: Color) -> Lambertian {
+        Lambertian { attenuation: color }
     }
 }
 
 impl Material for Lambertian {
-    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> Vec<(Ray, Pixel)> {
+    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> Vec<(Ray, Color)> {
         let origin = intersection.point();
         let center = origin + intersection.normal();
         let direction = rand_point_on_sphere(&center, 1.0) - origin;
@@ -54,20 +51,18 @@ impl Material for Lambertian {
 /// A hemispherical diffuse material.
 #[derive(Debug, Clone, Copy)]
 pub struct Hemispherical {
-    attenuation: Pixel,
+    attenuation: Color,
 }
 
 impl Hemispherical {
     /// Construct a colored diffuse material with hemispherical reflection.
-    pub fn new(r: f32, g: f32, b: f32) -> Hemispherical {
-        Hemispherical {
-            attenuation: Pixel(r, g, b),
-        }
+    pub fn new(color: Color) -> Hemispherical {
+        Hemispherical { attenuation: color }
     }
 }
 
 impl Material for Hemispherical {
-    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> Vec<(Ray, Pixel)> {
+    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> Vec<(Ray, Color)> {
         let origin = intersection.point();
         let direction = rand_point_on_sphere(&origin, 1.0) - origin;
         if direction.dot(intersection.normal()) > 0.0 {
@@ -87,7 +82,7 @@ mod test {
     fn test_lambertian_reflects_outward() {
         let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
         let intersection = Intersection::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
-        let lambertian = Lambertian::new(1.0, 1.0, 1.0);
+        let lambertian = Lambertian::new(Color(1.0, 1.0, 1.0));
         let scatters = lambertian.scatter_at(&ray, &intersection);
 
         for (reflection, _) in scatters {
@@ -100,7 +95,7 @@ mod test {
     fn test_hemispherical_reflects_outward() {
         let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
         let intersection = Intersection::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
-        let hemispherical = Hemispherical::new(1.0, 1.0, 1.0);
+        let hemispherical = Hemispherical::new(Color(1.0, 1.0, 1.0));
         let scatters = hemispherical.scatter_at(&ray, &intersection);
 
         for (reflection, _) in scatters {
