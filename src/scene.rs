@@ -71,34 +71,18 @@ impl Scene {
                 .iter()
                 .map(|(reflected, attenuation)| {
                     let rendered = self.render_ray(reflected, depth - 1);
-                    image::Pixel {
-                        r: rendered.r * attenuation.r,
-                        g: rendered.g * attenuation.g,
-                        b: rendered.b * attenuation.b,
-                    }
+                    rendered * attenuation
                 })
-                .fold(image::Pixel::default(), |acc, pixel| image::Pixel {
-                    r: acc.r + pixel.r,
-                    g: acc.g + pixel.g,
-                    b: acc.b + pixel.b,
-                });
+                .fold(image::Pixel::default(), |acc, pixel| acc + pixel);
             if !scatters.is_empty() {
-                image::Pixel {
-                    r: acc.r / (scatters.len() as f32),
-                    g: acc.g / (scatters.len() as f32),
-                    b: acc.b / (scatters.len() as f32),
-                }
+                acc / (scatters.len() as f32)
             } else {
                 image::Pixel::default()
             }
         } else {
             // Fall-back: fancy blue-ish gradient
             let t = 0.5 * (ray.direction().z() + 1.0);
-            image::Pixel {
-                r: (1.0 - t) * 1.0 + t * 0.5,
-                g: (1.0 - t) * 1.0 + t * 0.7,
-                b: (1.0 - t) * 1.0 + t * 1.0,
-            }
+            ((1.0 - t) * image::Pixel(1.0, 1.0, 1.0)) + (t * image::Pixel(0.5, 0.7, 1.0))
         }
     }
 }

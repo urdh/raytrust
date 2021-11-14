@@ -1,14 +1,43 @@
+use auto_ops::*;
 use std::ops::{Index, IndexMut};
 use std::slice::{ChunksExact, ChunksExactMut};
 
 /// Pixels are represented using three floating-point color channels,
 /// with range from `0.0` to `1.0`. There is no alpha channel.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
-pub struct Pixel {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
+pub struct Pixel(pub f32, pub f32, pub f32);
+
+impl Pixel {
+    /// The red channel of the pixel.
+    pub fn red(&self) -> f32 {
+        self.0
+    }
+
+    /// The green channel of the pixel.
+    pub fn green(&self) -> f32 {
+        self.1
+    }
+
+    /// The blue channel of the pixel.
+    pub fn blue(&self) -> f32 {
+        self.2
+    }
 }
+
+impl_op_ex!(+= |a: &mut Pixel, b: &Pixel| { *a = *a + b; });
+impl_op_ex!(+|a: &Pixel, b: &Pixel| -> Pixel { Pixel(a.0 + b.0, a.1 + b.1, a.2 + b.2) });
+
+impl_op_ex!(-= |a: &mut Pixel, b: &Pixel| { *a = *a - b; });
+impl_op_ex!(-|a: &Pixel, b: &Pixel| -> Pixel { Pixel(a.0 - b.0, a.1 - b.1, a.2 - b.2) });
+
+impl_op_ex!(*= |a: &mut Pixel, b: &Pixel| { *a = *a * b; });
+impl_op_ex!(*|a: &Pixel, b: &Pixel| -> Pixel { Pixel(a.0 * b.0, a.1 * b.1, a.2 * b.2) });
+
+impl_op_ex!(*= |a: &mut Pixel, b: &f32| { *a = *a * b; });
+impl_op_ex_commutative!(*|a: &Pixel, b: &f32| -> Pixel { Pixel(a.0 * b, a.1 * b, a.2 * b) });
+
+impl_op_ex!(/= |a: &mut Pixel, b: &f32| { *a = *a / b; });
+impl_op_ex!(/|a: &Pixel, b: &f32| -> Pixel { Pixel(a.0 / b, a.1 / b, a.2 / b) });
 
 /// An image is a two-dimensional matrix of pixels, with its origin
 /// in the top left corner.
@@ -123,11 +152,7 @@ mod test {
 
     #[test]
     fn test_pixel_default_is_black() {
-        let expected = Pixel {
-            r: 0.0,
-            g: 0.0,
-            b: 0.0,
-        };
+        let expected = Pixel(0.0, 0.0, 0.0);
         assert_eq!(Pixel::default(), expected);
     }
 
@@ -140,7 +165,7 @@ mod test {
 
     #[test]
     fn test_image_index() {
-        let gray = |v: f32| Pixel { r: v, g: v, b: v };
+        let gray = |v: f32| Pixel(v, v, v);
         let mut image = Image::new(2, 2);
         for idx in 0..image.pixels.len() {
             image.pixels[idx] = gray((idx as f32) / 10.0);

@@ -33,7 +33,7 @@ impl Lambertian {
     /// Construct a colored diffuse material with lambertian reflection.
     pub fn new(r: f32, g: f32, b: f32) -> Lambertian {
         Lambertian {
-            attenuation: Pixel { r, g, b },
+            attenuation: Pixel(r, g, b),
         }
     }
 }
@@ -61,7 +61,7 @@ impl Hemispherical {
     /// Construct a colored diffuse material with hemispherical reflection.
     pub fn new(r: f32, g: f32, b: f32) -> Hemispherical {
         Hemispherical {
-            attenuation: Pixel { r, g, b },
+            attenuation: Pixel(r, g, b),
         }
     }
 }
