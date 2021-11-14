@@ -70,8 +70,8 @@ impl Scene {
             let acc = scatters
                 .iter()
                 .map(|(reflected, attenuation)| {
-                    let rendered = self.render_ray(reflected, depth - 1);
-                    rendered * attenuation
+                    self.render_ray(reflected, depth - 1)
+                        * image::Pixel(attenuation.red(), attenuation.green(), attenuation.blue())
                 })
                 .fold(image::Pixel::default(), |acc, pixel| acc + pixel);
             if !scatters.is_empty() {
@@ -95,7 +95,7 @@ mod test {
 
     #[test]
     fn test_intersection_filter() {
-        let material = Lambertian::new(1.0, 1.0, 1.0);
+        let material = Lambertian::new(Color(1.0, 1.0, 1.0));
         let sphere = Sphere {
             center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
@@ -115,7 +115,7 @@ mod test {
 
     #[test]
     fn test_multiple_objects() {
-        let material = Lambertian::new(1.0, 1.0, 1.0);
+        let material = Lambertian::new(Color(1.0, 1.0, 1.0));
         let sphere_a = Sphere {
             center: Point3(0.0, 0.0, 2.0),
             radius: 1.0,
