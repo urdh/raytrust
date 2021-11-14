@@ -43,7 +43,11 @@ impl Material for Lambertian {
         let origin = intersection.point();
         let center = origin + intersection.normal();
         let direction = rand_point_on_sphere(&center, 1.0) - origin;
-        (Ray::new(origin, direction), self.attenuation)
+        if direction.norm() > 0.0 {
+            (Ray::new(origin, direction), self.attenuation)
+        } else {
+            (Ray::new(origin, intersection.normal()), self.attenuation)
+        }
     }
 }
 
