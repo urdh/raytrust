@@ -10,36 +10,63 @@ mod types;
 
 use camera::Camera;
 pub use image::Image;
-use materials::{Hemispherical, Lambertian};
+use materials::{Hemispherical, Lambertian, Metal};
 use scene::{Object, Scene};
 use surfaces::Sphere;
 use types::{Point3, Vect3};
 
 /// Get a sample scene containing sample surfaces.
 pub fn get_scene() -> Scene {
-    let sphere = Object {
-        surface: Box::new(Sphere {
-            center: Point3 {
-                z: -1.0,
-                ..Point3::zero()
-            },
-            radius: 0.5,
-        }),
-        material: Box::new(Lambertian::new(0.7, 0.3, 0.3)),
-    };
-    let ground = Object {
-        surface: Box::new(Sphere {
-            center: Point3 {
-                y: -100.5,
-                z: -1.0,
-                ..Point3::zero()
-            },
-            radius: 100.0,
-        }),
-        material: Box::new(Hemispherical::new(0.8, 0.8, 0.0)),
-    };
     Scene {
-        objects: vec![sphere, ground],
+        objects: vec![
+            // Left side metal sphere.
+            Object {
+                surface: Box::new(Sphere {
+                    center: Point3 {
+                        x: -1.0,
+                        z: -1.0,
+                        ..Point3::zero()
+                    },
+                    radius: 0.5,
+                }),
+                material: Box::new(Metal::new(0.8, 0.8, 0.8)),
+            },
+            // Center diffuse sphere.
+            Object {
+                surface: Box::new(Sphere {
+                    center: Point3 {
+                        z: -1.0,
+                        ..Point3::zero()
+                    },
+                    radius: 0.5,
+                }),
+                material: Box::new(Lambertian::new(0.7, 0.3, 0.3)),
+            },
+            // Right side metal sphere.
+            Object {
+                surface: Box::new(Sphere {
+                    center: Point3 {
+                        x: 1.0,
+                        z: -1.0,
+                        ..Point3::zero()
+                    },
+                    radius: 0.5,
+                }),
+                material: Box::new(Metal::new(0.8, 0.6, 0.2)),
+            },
+            // "Ground" sphere.
+            Object {
+                surface: Box::new(Sphere {
+                    center: Point3 {
+                        y: -100.5,
+                        z: -1.0,
+                        ..Point3::zero()
+                    },
+                    radius: 100.0,
+                }),
+                material: Box::new(Hemispherical::new(0.8, 0.8, 0.0)),
+            },
+        ],
     }
 }
 

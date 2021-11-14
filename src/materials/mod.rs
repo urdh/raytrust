@@ -1,8 +1,10 @@
 /// Materials used to render surfaces.
 mod diffuse;
+mod reflective;
 
 // Exports.
 pub use diffuse::{Hemispherical, Lambertian};
+pub use reflective::Metal;
 
 // Imports.
 use crate::image::Pixel;
