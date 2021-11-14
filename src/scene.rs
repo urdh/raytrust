@@ -65,8 +65,13 @@ impl Scene {
         }
         if let Some((intersection, material)) = ray.intersects(self, 0.001..f32::INFINITY) {
             // We have an intersection! Recurse, then absorb part of the color.
-            let reflected = material.reflect_at(ray, &intersection);
-            material.absorb(&self.render_ray(&reflected, depth - 1))
+            let (reflected, attenuation) = material.scatter_at(ray, &intersection);
+            let rendered = self.render_ray(&reflected, depth - 1);
+            image::Pixel {
+                r: rendered.r * attenuation.r,
+                g: rendered.g * attenuation.g,
+                b: rendered.b * attenuation.b,
+            }
         } else {
             // Fall-back: fancy blue-ish gradient
             let t = 0.5 * (ray.direction().y + 1.0);
@@ -87,7 +92,7 @@ mod test {
 
     #[test]
     fn test_intersection_filter() {
-        let material = Lambertian { absorption: 1.0 };
+        let material = Lambertian::new(1.0, 1.0, 1.0);
         let sphere = Sphere {
             center: Point3 {
                 z: 2.0,
@@ -116,7 +121,7 @@ mod test {
 
     #[test]
     fn test_multiple_objects() {
-        let material = Lambertian { absorption: 1.0 };
+        let material = Lambertian::new(1.0, 1.0, 1.0);
         let sphere_a = Sphere {
             center: Point3 {
                 z: 2.0,

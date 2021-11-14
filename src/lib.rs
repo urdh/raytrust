@@ -25,7 +25,7 @@ pub fn get_scene() -> Scene {
             },
             radius: 0.5,
         }),
-        material: Box::new(Lambertian { absorption: 0.5 }),
+        material: Box::new(Lambertian::new(0.7, 0.3, 0.3)),
     };
     let ground = Object {
         surface: Box::new(Sphere {
@@ -36,7 +36,7 @@ pub fn get_scene() -> Scene {
             },
             radius: 100.0,
         }),
-        material: Box::new(Hemispherical { absorption: 0.5 }),
+        material: Box::new(Hemispherical::new(0.8, 0.8, 0.0)),
     };
     Scene {
         objects: vec![sphere, ground],
