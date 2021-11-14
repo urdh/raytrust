@@ -13,10 +13,7 @@ fn rand_point_on_disk(normal: &Vect3, radius: f32) -> Vect3 {
     let mut rng = thread_rng();
     let r: f32 = rng.sample(Uniform::new_inclusive(0.0, radius));
     let phi: f32 = rng.sample(Uniform::new(0.0, 2.0 * PI));
-    let horiz = Vect3 {
-        x: 1.0,
-        ..Vect3::zero()
-    };
+    let horiz = Vect3(1.0, 0.0, 0.0);
     let x = (horiz - normal.project(horiz)).normalize();
     let y = normal.cross(x);
     (x * r.sqrt() * phi.cos()) + (y * r.sqrt() * phi.sin())

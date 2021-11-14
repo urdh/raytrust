@@ -26,10 +26,7 @@ impl Camera {
     ) -> Camera {
         // Assume the camera is horizontal, e.g. the horizontal
         // axis of the viewport is parallel to the X axis.
-        let x_axis = Vect3 {
-            x: 1.0,
-            ..Vect3::zero()
-        };
+        let x_axis = Vect3(1.0, 0.0, 0.0);
         let horiz = viewport.0 * (x_axis - direction.project(x_axis)).normalize();
         let vert = viewport.1 * direction.normalize().cross(horiz.normalize());
         // Finally, construct the camera.

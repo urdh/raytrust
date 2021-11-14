@@ -10,11 +10,11 @@ use rand_distr::StandardNormal;
 /// See <https://mathworld.wolfram.com/SpherePointPicking.html>.
 fn rand_point_on_sphere(origin: &Point3, radius: f32) -> Point3 {
     let mut rng = thread_rng();
-    let vec = Vect3 {
-        x: rng.sample(StandardNormal),
-        y: rng.sample(StandardNormal),
-        z: rng.sample(StandardNormal),
-    };
+    let vec = Vect3(
+        rng.sample(StandardNormal),
+        rng.sample(StandardNormal),
+        rng.sample(StandardNormal),
+    );
     let norm = vec.norm();
     if norm == 0.0 {
         rand_point_on_sphere(origin, radius)
@@ -85,20 +85,8 @@ mod test {
 
     #[test]
     fn test_lambertian_reflects_outward() {
-        let ray = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
-        let intersection = Intersection::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
+        let intersection = Intersection::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
         let lambertian = Lambertian::new(1.0, 1.0, 1.0);
         let scatters = lambertian.scatter_at(&ray, &intersection);
 
@@ -110,20 +98,8 @@ mod test {
 
     #[test]
     fn test_hemispherical_reflects_outward() {
-        let ray = Ray::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
-        let intersection = Intersection::new(
-            Point3::zero(),
-            Vect3 {
-                z: 1.0,
-                ..Vect3::zero()
-            },
-        );
+        let ray = Ray::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
+        let intersection = Intersection::new(Point3::zero(), Vect3(0.0, 0.0, 1.0));
         let hemispherical = Hemispherical::new(1.0, 1.0, 1.0);
         let scatters = hemispherical.scatter_at(&ray, &intersection);
 
