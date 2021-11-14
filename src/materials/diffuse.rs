@@ -26,48 +26,50 @@ fn rand_point_on_sphere(origin: &Point3, radius: f32) -> Point3 {
 /// A lambertian diffuse material.
 #[derive(Debug, Clone, Copy)]
 pub struct Lambertian {
-    pub absorption: f32,
+    attenuation: Pixel,
+}
+
+impl Lambertian {
+    /// Construct a colored diffuse material with lambertian reflection.
+    pub fn new(r: f32, g: f32, b: f32) -> Lambertian {
+        Lambertian {
+            attenuation: Pixel { r, g, b },
+        }
+    }
 }
 
 impl Material for Lambertian {
-    fn reflect_at(&self, _ray: &Ray, intersection: &Intersection) -> Ray {
+    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> (Ray, Pixel) {
         let origin = intersection.point();
         let center = origin + intersection.normal();
         let direction = rand_point_on_sphere(&center, 1.0) - origin;
-        Ray::new(origin, direction)
-    }
-
-    fn absorb(&self, pixel: &Pixel) -> Pixel {
-        Pixel {
-            r: self.absorption * pixel.r,
-            g: self.absorption * pixel.g,
-            b: self.absorption * pixel.b,
-        }
+        (Ray::new(origin, direction), self.attenuation)
     }
 }
 
 /// A hemispherical diffuse material.
 #[derive(Debug, Clone, Copy)]
 pub struct Hemispherical {
-    pub absorption: f32,
+    attenuation: Pixel,
+}
+
+impl Hemispherical {
+    /// Construct a colored diffuse material with hemispherical reflection.
+    pub fn new(r: f32, g: f32, b: f32) -> Hemispherical {
+        Hemispherical {
+            attenuation: Pixel { r, g, b },
+        }
+    }
 }
 
 impl Material for Hemispherical {
-    fn reflect_at(&self, _ray: &Ray, intersection: &Intersection) -> Ray {
+    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> (Ray, Pixel) {
         let origin = intersection.point();
         let direction = rand_point_on_sphere(&origin, 1.0) - origin;
         if direction.dot(intersection.normal()) > 0.0 {
-            Ray::new(origin, direction)
+            (Ray::new(origin, direction), self.attenuation)
         } else {
-            Ray::new(origin, -direction)
-        }
-    }
-
-    fn absorb(&self, pixel: &Pixel) -> Pixel {
-        Pixel {
-            r: self.absorption * pixel.r,
-            g: self.absorption * pixel.g,
-            b: self.absorption * pixel.b,
+            (Ray::new(origin, -direction), self.attenuation)
         }
     }
 }
@@ -93,8 +95,8 @@ mod test {
                 ..Vect3::zero()
             },
         );
-        let lambertian = Lambertian { absorption: 1.0 };
-        let reflection = lambertian.reflect_at(&ray, &intersection);
+        let lambertian = Lambertian::new(1.0, 1.0, 1.0);
+        let (reflection, _) = lambertian.scatter_at(&ray, &intersection);
 
         assert_eq!(reflection.origin(), intersection.point());
         assert!(reflection.direction().dot(intersection.normal()) > 0.0);
@@ -116,8 +118,8 @@ mod test {
                 ..Vect3::zero()
             },
         );
-        let hemispherical = Hemispherical { absorption: 1.0 };
-        let reflection = hemispherical.reflect_at(&ray, &intersection);
+        let hemispherical = Hemispherical::new(1.0, 1.0, 1.0);
+        let (reflection, _) = hemispherical.scatter_at(&ray, &intersection);
 
         assert_eq!(reflection.origin(), intersection.point());
         assert!(reflection.direction().dot(intersection.normal()) > 0.0);
