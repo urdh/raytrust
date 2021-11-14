@@ -64,13 +64,32 @@ impl Scene {
             return image::Pixel::default();
         }
         if let Some((intersection, material)) = ray.intersects(self, 0.001..f32::INFINITY) {
-            // We have an intersection! Recurse, then absorb part of the color.
-            let (reflected, attenuation) = material.scatter_at(ray, &intersection);
-            let rendered = self.render_ray(&reflected, depth - 1);
-            image::Pixel {
-                r: rendered.r * attenuation.r,
-                g: rendered.g * attenuation.g,
-                b: rendered.b * attenuation.b,
+            // We have an intersection! Scatter the ray, then average the attenuated
+            // color of each scattered ray to get the color of the pixel.
+            let scatters = material.scatter_at(ray, &intersection);
+            let acc = scatters
+                .iter()
+                .map(|(reflected, attenuation)| {
+                    let rendered = self.render_ray(reflected, depth - 1);
+                    image::Pixel {
+                        r: rendered.r * attenuation.r,
+                        g: rendered.g * attenuation.g,
+                        b: rendered.b * attenuation.b,
+                    }
+                })
+                .fold(image::Pixel::default(), |acc, pixel| image::Pixel {
+                    r: acc.r + pixel.r,
+                    g: acc.g + pixel.g,
+                    b: acc.b + pixel.b,
+                });
+            if !scatters.is_empty() {
+                image::Pixel {
+                    r: acc.r / (scatters.len() as f32),
+                    g: acc.g / (scatters.len() as f32),
+                    b: acc.b / (scatters.len() as f32),
+                }
+            } else {
+                image::Pixel::default()
             }
         } else {
             // Fall-back: fancy blue-ish gradient
