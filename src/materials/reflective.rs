@@ -30,7 +30,7 @@ impl Metal {
     /// Construct a metal material with a given attenuation.
     pub fn new(r: f32, g: f32, b: f32, fuzziness: f32) -> Metal {
         Metal {
-            attenuation: Pixel { r, g, b },
+            attenuation: Pixel(r, g, b),
             pertubation: fuzziness,
         }
     }

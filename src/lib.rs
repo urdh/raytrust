@@ -97,16 +97,8 @@ where
                     let v = ((y as f32) + rng.gen_range(0.0..1.0)) / ((height as f32) - 1.0);
                     scene.render_ray(&camera.ray(u, v), depth)
                 })
-                .fold(image::Pixel::default(), |acc, pixel| image::Pixel {
-                    r: acc.r + pixel.r,
-                    g: acc.g + pixel.g,
-                    b: acc.b + pixel.b,
-                });
-            *pixel = image::Pixel {
-                r: acc.r / (samples as f32),
-                g: acc.g / (samples as f32),
-                b: acc.b / (samples as f32),
-            };
+                .fold(image::Pixel::default(), |acc, pixel| acc + pixel);
+            *pixel = acc / (samples as f32);
         }
         callback(height - y);
     }
@@ -147,9 +139,9 @@ where
             writeln!(
                 stream,
                 "{} {} {}",
-                ((pixel.r.powf(gamma.recip()) * 255.0).round() as u8),
-                ((pixel.g.powf(gamma.recip()) * 255.0).round() as u8),
-                ((pixel.b.powf(gamma.recip()) * 255.0).round() as u8)
+                ((pixel.red().powf(gamma.recip()) * 255.0).round() as u8),
+                ((pixel.green().powf(gamma.recip()) * 255.0).round() as u8),
+                ((pixel.blue().powf(gamma.recip()) * 255.0).round() as u8)
             )?;
         }
         callback(y + 1);
@@ -165,16 +157,8 @@ mod test {
     #[test]
     fn test_write_pgm() -> Result<(), io::Error> {
         let mut image = Image::new(1, 2);
-        image[0][0] = image::Pixel {
-            r: 1.0,
-            g: 0.5,
-            b: 0.0,
-        };
-        image[1][0] = image::Pixel {
-            r: 1.25,
-            g: -1.25,
-            b: 0.0,
-        };
+        image[0][0] = image::Pixel(1.0, 0.5, 0.0);
+        image[1][0] = image::Pixel(1.25, -1.25, 0.0);
 
         let mut vec: Vec<u8> = Vec::new();
         write_pgm(&mut vec, &image, 1.0, |_: usize| ())?;
