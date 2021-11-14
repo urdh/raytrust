@@ -29,7 +29,7 @@ pub fn get_scene() -> Scene {
                     },
                     radius: 0.5,
                 }),
-                material: Box::new(Metal::new(0.8, 0.8, 0.8)),
+                material: Box::new(Metal::new(0.8, 0.8, 0.8, 0.3)),
             },
             // Center diffuse sphere.
             Object {
@@ -52,7 +52,7 @@ pub fn get_scene() -> Scene {
                     },
                     radius: 0.5,
                 }),
-                material: Box::new(Metal::new(0.8, 0.6, 0.2)),
+                material: Box::new(Metal::new(0.8, 0.6, 0.2, 1.0)),
             },
             // "Ground" sphere.
             Object {
