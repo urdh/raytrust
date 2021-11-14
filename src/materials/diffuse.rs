@@ -39,14 +39,14 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> (Ray, Pixel) {
+    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> Vec<(Ray, Pixel)> {
         let origin = intersection.point();
         let center = origin + intersection.normal();
         let direction = rand_point_on_sphere(&center, 1.0) - origin;
         if direction.norm() > 0.0 {
-            (Ray::new(origin, direction), self.attenuation)
+            vec![(Ray::new(origin, direction), self.attenuation)]
         } else {
-            (Ray::new(origin, intersection.normal()), self.attenuation)
+            vec![(Ray::new(origin, intersection.normal()), self.attenuation)]
         }
     }
 }
@@ -67,13 +67,13 @@ impl Hemispherical {
 }
 
 impl Material for Hemispherical {
-    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> (Ray, Pixel) {
+    fn scatter_at(&self, _ray: &Ray, intersection: &Intersection) -> Vec<(Ray, Pixel)> {
         let origin = intersection.point();
         let direction = rand_point_on_sphere(&origin, 1.0) - origin;
         if direction.dot(intersection.normal()) > 0.0 {
-            (Ray::new(origin, direction), self.attenuation)
+            vec![(Ray::new(origin, direction), self.attenuation)]
         } else {
-            (Ray::new(origin, -direction), self.attenuation)
+            vec![(Ray::new(origin, -direction), self.attenuation)]
         }
     }
 }
@@ -100,10 +100,12 @@ mod test {
             },
         );
         let lambertian = Lambertian::new(1.0, 1.0, 1.0);
-        let (reflection, _) = lambertian.scatter_at(&ray, &intersection);
+        let scatters = lambertian.scatter_at(&ray, &intersection);
 
-        assert_eq!(reflection.origin(), intersection.point());
-        assert!(reflection.direction().dot(intersection.normal()) > 0.0);
+        for (reflection, _) in scatters {
+            assert_eq!(reflection.origin(), intersection.point());
+            assert!(reflection.direction().dot(intersection.normal()) > 0.0);
+        }
     }
 
     #[test]
@@ -123,9 +125,11 @@ mod test {
             },
         );
         let hemispherical = Hemispherical::new(1.0, 1.0, 1.0);
-        let (reflection, _) = hemispherical.scatter_at(&ray, &intersection);
+        let scatters = hemispherical.scatter_at(&ray, &intersection);
 
-        assert_eq!(reflection.origin(), intersection.point());
-        assert!(reflection.direction().dot(intersection.normal()) > 0.0);
+        for (reflection, _) in scatters {
+            assert_eq!(reflection.origin(), intersection.point());
+            assert!(reflection.direction().dot(intersection.normal()) > 0.0);
+        }
     }
 }
