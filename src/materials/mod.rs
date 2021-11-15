@@ -1,8 +1,10 @@
 /// Materials used to render surfaces.
+mod dielectric;
 mod diffuse;
 mod reflective;
 
 // Exports.
+pub use dielectric::Dielectric;
 pub use diffuse::{Hemispherical, Lambertian};
 pub use reflective::Metal;
 
