@@ -81,7 +81,7 @@ impl Scene {
             }
         } else {
             // Fall-back: fancy blue-ish gradient
-            let t = 0.5 * (ray.direction().z() + 1.0);
+            let t = 0.5 * (ray.direction().y() + 1.0);
             ((1.0 - t) * image::Pixel(1.0, 1.0, 1.0)) + (t * image::Pixel(0.5, 0.7, 1.0))
         }
     }
