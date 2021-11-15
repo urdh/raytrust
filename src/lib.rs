@@ -10,7 +10,7 @@ mod types;
 
 use camera::Camera;
 pub use image::Image;
-use materials::{Color, Hemispherical, Lambertian, Metal};
+use materials::{Color, Dielectric, Hemispherical, Lambertian, Metal};
 use scene::{Object, Scene};
 use surfaces::Sphere;
 use types::{Point3, Vect3};
@@ -19,13 +19,20 @@ use types::{Point3, Vect3};
 pub fn get_scene() -> Scene {
     Scene {
         objects: vec![
-            // Left side metal sphere.
+            // Left side hollow dielectric sphere.
             Object {
                 surface: Box::new(Sphere {
                     center: Point3(-1.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
-                material: Box::new(Metal::new(Color(0.8, 0.8, 0.8), 0.3)),
+                material: Box::new(Dielectric::new(Color(1.0, 1.0, 1.0), 1.5)),
+            },
+            Object {
+                surface: Box::new(Sphere {
+                    center: Point3(-1.0, 0.0, -1.0),
+                    radius: -0.4,
+                }),
+                material: Box::new(Dielectric::new(Color(1.0, 1.0, 1.0), 1.5)),
             },
             // Center diffuse sphere.
             Object {
@@ -33,7 +40,7 @@ pub fn get_scene() -> Scene {
                     center: Point3(0.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
-                material: Box::new(Lambertian::new(Color(0.7, 0.3, 0.3))),
+                material: Box::new(Lambertian::new(Color(0.1, 0.2, 0.5))),
             },
             // Right side metal sphere.
             Object {
@@ -41,7 +48,7 @@ pub fn get_scene() -> Scene {
                     center: Point3(1.0, 0.0, -1.0),
                     radius: 0.5,
                 }),
-                material: Box::new(Metal::new(Color(0.8, 0.6, 0.2), 1.0)),
+                material: Box::new(Metal::new(Color(0.8, 0.6, 0.2), 0.0)),
             },
             // "Ground" sphere.
             Object {
