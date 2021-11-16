@@ -33,14 +33,14 @@ impl Ray {
         scene
             .objects
             .iter()
-            .filter_map(|object| {
+            .flat_map(|object| {
                 object
                     .surface
-                    .intersected_by(self)
-                    .map(|intersection| (intersection, &*object.material))
+                    .intersected_by(self, filter.clone())
+                    .into_iter()
+                    .map(move |intersection| (intersection, &*object.material))
             })
             .map(|match_| (match_, (match_.0.point() - self.origin()).norm()))
-            .filter(|(_, distance)| filter.contains(distance))
             .min_by(|(_, a), (_, b)| match (a.is_nan(), b.is_nan()) {
                 (true, true) => Ordering::Equal,
                 (true, false) => Ordering::Greater,
