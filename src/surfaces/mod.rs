@@ -6,15 +6,17 @@ pub use sphere::Sphere;
 
 // Imports.
 use crate::types::{Point3, Ray, Vect3};
+use std::ops::Range;
 
 /// An intersectable surface.
 pub trait Surface {
-    /// Check whether a ray intersects this surface.
+    /// Return all intersectiona between a ray and this surface.
     ///
     /// # Arguments
     ///
     /// * `ray` - ray to trace along
-    fn intersected_by(&self, ray: &Ray) -> Option<Intersection>;
+    /// * `filter` - a distance range in which to intersect
+    fn intersected_by(&self, ray: &Ray, filter: Range<f32>) -> Vec<Intersection>;
 }
 
 /// An intersection.
