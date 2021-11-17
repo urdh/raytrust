@@ -88,12 +88,22 @@ where
 
     // Viewport & focal length
     let aspect_ratio = width as f32 / height as f32;
-    let viewport = (2.0 * aspect_ratio, 2.0);
-    let focal_length = 1.0;
+    let viewport = (2.0 * aspect_ratio, 2.0_f32);
+
+    // The angle of view can be determined using the diagonal image plane dimension `d`
+    // and the focal length `f`, using the relation `aov = 2 * arctan(d / 2f)`. Working
+    // backwards, we can calculate `f` as `f = d / (2 * tan(aov / 2))`.
+    // Note: Since we use diagonal field-of-view, exact angles will differ compared to
+    // the book (depending on aspect ratio).
+    let angle_of_view = 40.0_f32.to_radians();
+    let diagonal = (viewport.0.powi(2) + viewport.1.powi(2)).sqrt();
+    let focal_length = (diagonal / 2.0) / (angle_of_view / 2.0).tan();
 
     // Camera definition
-    let direction = Vect3(0.0, 0.0, 1.0);
-    let camera = Camera::new(Point3::zero(), direction, focal_length, viewport);
+    let origin = Point3(-2.0, 2.0, 1.0);
+    let target = Point3(0.0, 0.0, -1.0);
+    let vertical = Vect3(0.0, 1.0, 0.0);
+    let camera = Camera::new(origin, target, vertical, focal_length, viewport);
 
     // Render the image!
     for (y, row) in image.iter_mut().rev().enumerate() {
