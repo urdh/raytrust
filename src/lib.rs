@@ -98,12 +98,13 @@ where
     let angle_of_view = 40.0_f32.to_radians();
     let diagonal = (viewport.0.powi(2) + viewport.1.powi(2)).sqrt();
     let focal_length = (diagonal / 2.0) / (angle_of_view / 2.0).tan();
+    let aperture = 16.0;
 
     // Camera definition
     let origin = Point3(-2.0, 2.0, 1.0);
     let target = Point3(0.0, 0.0, -1.0);
     let vertical = Vect3(0.0, 1.0, 0.0);
-    let camera = Camera::new(origin, target, vertical, focal_length, viewport);
+    let camera = Camera::new(origin, target, vertical, focal_length, aperture, viewport);
 
     // Render the image!
     for (y, row) in image.iter_mut().rev().enumerate() {
