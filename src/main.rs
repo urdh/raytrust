@@ -34,7 +34,8 @@ fn main() -> Result<(), io::Error> {
         render_pb.set_message(format!("Rendered line {}/{}", row, height));
         render_pb.tick()
     };
-    let image = render(&get_scene(), width, height, samples, depth, render_cb);
+    let (camera, scene) = get_scene((width as f32) / (height as f32));
+    let image = render(&scene, &camera, width, height, samples, depth, render_cb);
     render_pb.finish_with_message(format!("{} lines rendered!", height));
 
     // Write to file
