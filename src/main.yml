@@ -26,3 +26,8 @@ args:
         long: depth
         takes_value: true
         default_value: "50"
+    - scene:
+        help: rendered scene
+        long: scene
+        takes_value: true
+        default_value: "small"
