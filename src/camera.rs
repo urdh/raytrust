@@ -3,6 +3,24 @@ use rand::{thread_rng, Rng};
 use rand_distr::Uniform;
 use std::f32::consts::PI;
 
+/// Pick a random point in an isosceles triangle that is
+/// symmetric around the horizontal axis.
+///
+/// See <https://mathworld.wolfram.com/TrianglePointPicking.html>.
+fn rand_point_in_triangle(angle: f32) -> Vect3 {
+    let mut rng = thread_rng();
+    let up = Vect3((angle / 2.0).cos(), (angle / 2.0).sin(), 0.0);
+    let down = Vect3(up.x(), -up.y(), up.z());
+    let u = rng.sample(Uniform::new_inclusive(0.0, 1.0));
+    let v = rng.sample(Uniform::new_inclusive(0.0, 1.0));
+    let point = u * up + v * down;
+    if point.x() > up.x() {
+        Vect3(up.x(), 0.0, 0.0) - point
+    } else {
+        point
+    }
+}
+
 /// A camera abstraction.
 #[derive(Debug, Clone, Copy)]
 pub struct Camera {
@@ -58,21 +76,31 @@ impl Camera {
         }
     }
 
-    /// Sample a singe point for a perfectly circular aperture.
-    fn sample_aperture(&self) -> Vect3 {
+    /// Sample a singe point for a regular polygon aperture.
+    fn sample_aperture(&self, sides: u32) -> Vect3 {
         let mut rng = thread_rng();
-        // Generate a random point on the disk with radius r.
-        let r: f32 = rng.sample(Uniform::new_inclusive(0.0, 1.0));
-        let phi: f32 = rng.sample(Uniform::new(0.0, 2.0 * PI));
-        // Offset the aperture rays along the plane of the aperture.
+        let angle = 2.0 * PI * (sides as f32).recip();
+        // Genetare a random point on an isosceles triangle with angle
+        // 2π / N between the legs. Then, rotate this triangle by 2πn / N,
+        // where `n` is a random integer in the range [0, N), to get a
+        // random point on the regular N-polygon.
+        let segment = rng.sample(Uniform::new(0, sides));
+        let point = rand_point_in_triangle(angle);
+        let s = ((segment as f32) * angle).sin();
+        let c = ((segment as f32) * angle).cos();
         let (x, y, _) = &self.camera_cs;
-        (self.radius * x * r.sqrt() * phi.cos()) + (self.radius * y * r.sqrt() * phi.sin())
+        // In order to keep the area equal to the corresponding perfectly
+        // circular aperture, the radius must be scaled. The relative area
+        // of the polygon is given by N/2π sin(2π/N), so the radius must
+        // be scaled by the square root of the reciprocal of that value.
+        let radius = self.radius * (angle / angle.sin()).sqrt();
+        radius * ((x * (point.x() * c - point.y() * s)) + (y * (point.x() * s + point.y() * c)))
     }
 
     /// Get a ray pointing through a specific viewport position.
     pub fn ray(&self, u: f32, v: f32) -> Ray {
         let (w, h) = &self.image_plane;
-        let offset = self.sample_aperture();
+        let offset = self.sample_aperture(5);
         let direction = self.corner + (w * u) + (h * v) - self.origin;
         Ray::new(self.origin + offset, direction - offset)
     }
