@@ -15,9 +15,28 @@ use scene::{Object, Scene};
 use surfaces::Sphere;
 use types::{Point3, Vect3};
 
-/// Get a sample scene containing sample surfaces.
-pub fn get_scene() -> Scene {
-    Scene {
+pub fn get_scene(aspect_ratio: f32) -> (Camera, Scene) {
+    // Viewport size.
+    let viewport = (2.0 * aspect_ratio, 2.0_f32);
+
+    // The angle of view can be determined using the diagonal image plane dimension `d`
+    // and the focal length `f`, using the relation `aov = 2 * arctan(d / 2f)`. Working
+    // backwards, we can calculate `f` as `f = d / (2 * tan(aov / 2))`.
+    // Note: Since we use diagonal field-of-view, exact angles will differ compared to
+    // the book (depending on aspect ratio).
+    let angle_of_view = 40.0_f32.to_radians();
+    let diagonal = (viewport.0.powi(2) + viewport.1.powi(2)).sqrt();
+    let focal_length = (diagonal / 2.0) / (angle_of_view / 2.0).tan();
+    let aperture = 16.0;
+
+    // Camera definition
+    let origin = Point3(-2.0, 2.0, 1.0);
+    let target = Point3(0.0, 0.0, -1.0);
+    let vertical = Vect3(0.0, 1.0, 0.0);
+    let camera = Camera::new(origin, target, vertical, focal_length, aperture, viewport);
+
+    // Small sample scene containing sample surfaces.
+    let scene = Scene {
         objects: vec![
             // Left side hollow dielectric sphere.
             Object {
@@ -59,7 +78,10 @@ pub fn get_scene() -> Scene {
                 material: Box::new(Hemispherical::new(Color(0.8, 0.8, 0.0))),
             },
         ],
-    }
+    };
+
+    // Return the camera & scene.
+    (camera, scene)
 }
 
 /// Render an image by raytracing.
@@ -74,6 +96,7 @@ pub fn get_scene() -> Scene {
 /// * `callback` - callback called when a row has been rendered
 pub fn render<F>(
     scene: &Scene,
+    camera: &Camera,
     width: usize,
     height: usize,
     samples: usize,
@@ -85,26 +108,6 @@ where
 {
     let mut image = Image::new(width, height);
     let mut rng = thread_rng();
-
-    // Viewport & focal length
-    let aspect_ratio = width as f32 / height as f32;
-    let viewport = (2.0 * aspect_ratio, 2.0_f32);
-
-    // The angle of view can be determined using the diagonal image plane dimension `d`
-    // and the focal length `f`, using the relation `aov = 2 * arctan(d / 2f)`. Working
-    // backwards, we can calculate `f` as `f = d / (2 * tan(aov / 2))`.
-    // Note: Since we use diagonal field-of-view, exact angles will differ compared to
-    // the book (depending on aspect ratio).
-    let angle_of_view = 40.0_f32.to_radians();
-    let diagonal = (viewport.0.powi(2) + viewport.1.powi(2)).sqrt();
-    let focal_length = (diagonal / 2.0) / (angle_of_view / 2.0).tan();
-    let aperture = 16.0;
-
-    // Camera definition
-    let origin = Point3(-2.0, 2.0, 1.0);
-    let target = Point3(0.0, 0.0, -1.0);
-    let vertical = Vect3(0.0, 1.0, 0.0);
-    let camera = Camera::new(origin, target, vertical, focal_length, aperture, viewport);
 
     // Render the image!
     for (y, row) in image.iter_mut().rev().enumerate() {
