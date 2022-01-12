@@ -1,3 +1,4 @@
+#![cfg_attr(nightly, feature(test))]
 use rand::{thread_rng, Rng};
 use rand_distr::Uniform;
 use std::io;
