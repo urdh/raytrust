@@ -54,6 +54,14 @@ impl Vect3 {
     pub fn project(self, other: Vect3) -> Vect3 {
         (self.dot(other) / self.dot(self)) * self
     }
+
+    /// Generate a random vector on the unit sphere.
+    #[cfg(test)]
+    pub fn sample<R: rand::Rng>(rng: &mut R) -> Vect3 {
+        use rand_distr::{Distribution, UnitSphere};
+        let vec = UnitSphere.sample(rng);
+        Vect3(vec[0], vec[1], vec[2])
+    }
 }
 
 impl fmt::Display for Vect3 {
