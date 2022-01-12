@@ -26,6 +26,14 @@ impl Point3 {
     pub fn z(&self) -> f32 {
         self.2
     }
+
+    /// Generate a random point in the unit ball.
+    #[cfg(test)]
+    pub fn sample<R: rand::Rng>(rng: &mut R) -> Point3 {
+        use rand_distr::{Distribution, UnitBall};
+        let point = UnitBall.sample(rng);
+        Point3(point[0], point[1], point[2])
+    }
 }
 
 impl fmt::Display for Point3 {

@@ -1,8 +1,7 @@
 use super::{Color, Material};
 use crate::surfaces::Intersection;
 use crate::types::{Ray, Vect3};
-use rand::{thread_rng, Rng};
-use rand_distr::Uniform;
+use rand_distr::{Distribution, Uniform};
 
 fn refract(incident: Vect3, normal: Vect3, ratio: f32) -> Vect3 {
     let cos_theta = incident.dot(-normal).min(1.0);
@@ -19,8 +18,8 @@ fn refract(incident: Vect3, normal: Vect3, ratio: f32) -> Vect3 {
             let r0 = (1.0 - ratio) / (1.0 + ratio);
             (r0 * r0) + (1.0 - r0 * r0) * (1.0 - cos_theta).powi(5)
         };
-        let mut rng = thread_rng();
-        if (ratio * sin_theta > 1.0) || (reflectance > rng.sample(Uniform::new(0.0, 1.0))) {
+        let p = Uniform::new(0.0, 1.0).sample(&mut rand::thread_rng());
+        if (ratio * sin_theta > 1.0) || (reflectance > p) {
             reflection
         } else {
             refraction
@@ -88,5 +87,35 @@ mod test {
         assert_abs_diff_eq!(result_2, Vect3(0.0, 1.0, -1.0).normalize(), epsilon = 0.001);
         assert_abs_diff_eq!(result_3, Vect3(0.0, 0.636396, 0.771362), epsilon = 0.001);
         assert_abs_diff_eq!(result_4, incident, epsilon = 0.001);
+    }
+}
+
+#[cfg(all(test, nightly))]
+mod bench {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn bench_dielectric_scatter_100_rays(b: &mut test::Bencher) {
+        use core::iter::zip;
+        let rays = (0..100)
+            .map(|_| Ray::sample(&mut rand::thread_rng()))
+            .collect::<Vec<Ray>>();
+        let intersections = rays
+            .iter()
+            .map(|r| {
+                Intersection::new(
+                    r.origin() + r.direction(),
+                    Vect3::sample(&mut rand::thread_rng()),
+                )
+            })
+            .collect::<Vec<Intersection>>();
+        let material = Dielectric::new(Color::default(), 0.5);
+        b.iter(|| {
+            zip(&rays, &intersections)
+                .map(|(r, i)| material.scatter_at(&r, &i))
+                .flatten()
+                .count()
+        });
     }
 }
