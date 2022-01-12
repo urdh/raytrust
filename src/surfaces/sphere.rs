@@ -86,3 +86,26 @@ mod test {
         assert_eq!(sphere.intersected_by(&ray, 0.0..f32::INFINITY), expected);
     }
 }
+
+#[cfg(all(test, nightly))]
+mod bench {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn bench_sphere_intersect_100_rays(b: &mut test::Bencher) {
+        let rays = (0..100)
+            .map(|_| Ray::sample(&mut rand::thread_rng()))
+            .collect::<Vec<Ray>>();
+        let sphere = Sphere {
+            center: Point3(0.0, 0.0, 1.0),
+            radius: 1.0,
+        };
+        b.iter(|| {
+            rays.iter()
+                .map(|r| sphere.intersected_by(r, 0.0..f32::INFINITY))
+                .flatten()
+                .count()
+        });
+    }
+}
