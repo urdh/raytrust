@@ -1,8 +1,7 @@
 use super::{Color, Material};
 use crate::surfaces::Intersection;
 use crate::types::{Ray, Vect3};
-use rand::{thread_rng, Rng};
-use rand_distr::Uniform;
+use rand_distr::{Distribution, Uniform};
 
 fn refract(incident: Vect3, normal: Vect3, ratio: f32) -> Vect3 {
     let cos_theta = incident.dot(-normal).min(1.0);
@@ -19,8 +18,8 @@ fn refract(incident: Vect3, normal: Vect3, ratio: f32) -> Vect3 {
             let r0 = (1.0 - ratio) / (1.0 + ratio);
             (r0 * r0) + (1.0 - r0 * r0) * (1.0 - cos_theta).powi(5)
         };
-        let mut rng = thread_rng();
-        if (ratio * sin_theta > 1.0) || (reflectance > rng.sample(Uniform::new(0.0, 1.0))) {
+        let p = Uniform::new(0.0, 1.0).sample(&mut rand::thread_rng());
+        if (ratio * sin_theta > 1.0) || (reflectance > p) {
             reflection
         } else {
             refraction
