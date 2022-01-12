@@ -42,3 +42,33 @@ impl Material for Metal {
         }
     }
 }
+
+#[cfg(all(test, nightly))]
+mod bench {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn bench_metal_scatter_100_rays(b: &mut test::Bencher) {
+        use core::iter::zip;
+        let rays = (0..100)
+            .map(|_| Ray::sample(&mut rand::thread_rng()))
+            .collect::<Vec<Ray>>();
+        let intersections = rays
+            .iter()
+            .map(|r| {
+                Intersection::new(
+                    r.origin() + r.direction(),
+                    Vect3::sample(&mut rand::thread_rng()),
+                )
+            })
+            .collect::<Vec<Intersection>>();
+        let material = Metal::new(Color::default(), 0.5);
+        b.iter(|| {
+            zip(&rays, &intersections)
+                .map(|(r, i)| material.scatter_at(&r, &i))
+                .flatten()
+                .count()
+        });
+    }
+}
