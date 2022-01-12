@@ -30,6 +30,14 @@ impl Ray {
     pub fn direction(&self) -> Vect3 {
         self.direction
     }
+
+    /// Generate a random ray.
+    #[cfg(test)]
+    pub fn sample<R: rand::Rng>(rng: &mut R) -> Ray {
+        let origin = Point3::sample(rng);
+        let direction = Vect3::sample(rng);
+        Ray::new(origin, direction)
+    }
 }
 
 #[cfg(test)]
