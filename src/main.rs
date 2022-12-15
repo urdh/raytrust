@@ -1,19 +1,41 @@
-use clap::*;
+use clap::Parser;
 use core::result::Result;
 use raytrust::{get_scene, render, write_pgm};
-use std::{fs, io, str::FromStr};
+use std::{fs, io};
+
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    /// Output file (PGM format)
+    #[arg(short, long)]
+    output: Option<String>,
+
+    /// Image width
+    #[arg(long, default_value_t = 800)]
+    width: usize,
+
+    /// Image height
+    #[arg(long, default_value_t = 450)]
+    height: usize,
+
+    /// Samples per pixel
+    #[arg(long, default_value_t = 10)]
+    samples: usize,
+
+    /// Recursion depth
+    #[arg(long, default_value_t = 50)]
+    depth: usize,
+
+    /// Rendered scene
+    #[arg(long, default_value_t = String::from("small"))]
+    scene: String,
+}
 
 fn main() -> Result<(), io::Error> {
-    let yml = load_yaml!("main.yml");
-    let app = App::from_yaml(yml)
-        .about(crate_description!())
-        .author(crate_authors!())
-        .name(crate_name!())
-        .version(crate_version!());
-    let matches = app.get_matches();
+    let cli = Cli::parse();
 
     // Argument: output file (or stdout if "-")
-    let mut output: Box<dyn io::Write> = match matches.value_of("output") {
+    let mut output: Box<dyn io::Write> = match cli.output {
         Some(file) => Box::new(
             fs::OpenOptions::new()
                 .write(true)
@@ -25,19 +47,16 @@ fn main() -> Result<(), io::Error> {
     };
 
     // Sample image
-    let width = usize::from_str(matches.value_of("width").unwrap()).unwrap();
-    let height = usize::from_str(matches.value_of("height").unwrap()).unwrap();
-    let samples = usize::from_str(matches.value_of("samples").unwrap()).unwrap();
-    let depth = usize::from_str(matches.value_of("depth").unwrap()).unwrap();
+    let width = cli.width;
+    let height = cli.height;
+    let samples = cli.samples;
+    let depth = cli.depth;
     let render_pb = indicatif::ProgressBar::new_spinner().with_message("Rendering image");
     let render_cb = |row: usize| {
         render_pb.set_message(format!("Rendered line {}/{}", row, height));
         render_pb.tick()
     };
-    let (camera, scene) = get_scene(
-        (width as f32) / (height as f32),
-        matches.value_of("scene").unwrap(),
-    );
+    let (camera, scene) = get_scene((width as f32) / (height as f32), cli.scene.as_str());
     let image = render(&scene, &camera, width, height, samples, depth, render_cb);
     render_pb.finish_with_message(format!("{} lines rendered!", height));
 
