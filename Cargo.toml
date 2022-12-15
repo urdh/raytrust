@@ -8,7 +8,7 @@ license = "Unlicense"
 publish = false
 
 [dependencies]
-clap = { version = "2.33", features = ["yaml"]}
+clap = { version = "4.0", features = ["derive"]}
 auto_ops = "0.3"
 indicatif = "0.17"
 rand = "0.8"
