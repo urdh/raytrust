@@ -1,21 +1,15 @@
 use super::{Color, Material};
 use crate::surfaces::Intersection;
 use crate::types::{Ray, Vect3};
-use rand::{thread_rng, Rng};
-use rand_distr::Uniform;
-use std::f32::consts::PI;
+use rand_distr::{Distribution, UnitDisc};
 
 /// Pick a random point on a disk orthogonal to `normal`.
-///
-/// See <https://mathworld.wolfram.com/DiskPointPicking.html>.
 fn rand_point_on_disk(normal: &Vect3, radius: f32) -> Vect3 {
-    let mut rng = thread_rng();
-    let r: f32 = rng.sample(Uniform::new_inclusive(0.0, radius));
-    let phi: f32 = rng.sample(Uniform::new(0.0, 2.0 * PI));
+    let vec: [f32; 2] = UnitDisc.sample(&mut rand::thread_rng());
     let horiz = Vect3(1.0, 0.0, 0.0);
     let x = (horiz - normal.project(horiz)).normalize();
     let y = normal.cross(x);
-    (x * r.sqrt() * phi.cos()) + (y * r.sqrt() * phi.sin())
+    (x * vec[0] * radius) + (y * vec[1] * radius)
 }
 
 /// A reflective metal-like material.
@@ -46,5 +40,35 @@ impl Material for Metal {
         } else {
             vec![]
         }
+    }
+}
+
+#[cfg(all(test, nightly))]
+mod bench {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn bench_metal_scatter_100_rays(b: &mut test::Bencher) {
+        use core::iter::zip;
+        let rays = (0..100)
+            .map(|_| Ray::sample(&mut rand::thread_rng()))
+            .collect::<Vec<Ray>>();
+        let intersections = rays
+            .iter()
+            .map(|r| {
+                Intersection::new(
+                    r.origin() + r.direction(),
+                    Vect3::sample(&mut rand::thread_rng()),
+                )
+            })
+            .collect::<Vec<Intersection>>();
+        let material = Metal::new(Color::default(), 0.5);
+        b.iter(|| {
+            zip(&rays, &intersections)
+                .map(|(r, i)| material.scatter_at(&r, &i))
+                .flatten()
+                .count()
+        });
     }
 }

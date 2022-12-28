@@ -1,25 +1,12 @@
 use super::{Color, Material};
 use crate::surfaces::Intersection;
 use crate::types::{Point3, Ray, Vect3};
-use rand::{thread_rng, Rng};
-use rand_distr::StandardNormal;
+use rand_distr::{Distribution, UnitSphere};
 
 /// Pick a random point on a sphere centered on `origin`.
-///
-/// See <https://mathworld.wolfram.com/SpherePointPicking.html>.
 fn rand_point_on_sphere(origin: &Point3, radius: f32) -> Point3 {
-    let mut rng = thread_rng();
-    let vec = Vect3(
-        rng.sample(StandardNormal),
-        rng.sample(StandardNormal),
-        rng.sample(StandardNormal),
-    );
-    let norm = vec.norm();
-    if norm == 0.0 {
-        rand_point_on_sphere(origin, radius)
-    } else {
-        origin + (vec * (radius / norm))
-    }
+    let vec = UnitSphere.sample(&mut rand::thread_rng());
+    origin + (Vect3(vec[0], vec[1], vec[2]) * radius)
 }
 
 /// A lambertian diffuse material.
@@ -102,5 +89,59 @@ mod test {
             assert_eq!(reflection.origin(), intersection.point());
             assert!(reflection.direction().dot(intersection.normal()) > 0.0);
         }
+    }
+}
+
+#[cfg(all(test, nightly))]
+mod bench {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn bench_lambertian_scatter_100_rays(b: &mut test::Bencher) {
+        use core::iter::zip;
+        let rays = (0..100)
+            .map(|_| Ray::sample(&mut rand::thread_rng()))
+            .collect::<Vec<Ray>>();
+        let intersections = rays
+            .iter()
+            .map(|r| {
+                Intersection::new(
+                    r.origin() + r.direction(),
+                    Vect3::sample(&mut rand::thread_rng()),
+                )
+            })
+            .collect::<Vec<Intersection>>();
+        let material = Lambertian::new(Color::default());
+        b.iter(|| {
+            zip(&rays, &intersections)
+                .map(|(r, i)| material.scatter_at(&r, &i))
+                .flatten()
+                .count()
+        });
+    }
+
+    #[bench]
+    fn bench_hemispherical_scatter_100_rays(b: &mut test::Bencher) {
+        use core::iter::zip;
+        let rays = (0..100)
+            .map(|_| Ray::sample(&mut rand::thread_rng()))
+            .collect::<Vec<Ray>>();
+        let intersections = rays
+            .iter()
+            .map(|r| {
+                Intersection::new(
+                    r.origin() + r.direction(),
+                    Vect3::sample(&mut rand::thread_rng()),
+                )
+            })
+            .collect::<Vec<Intersection>>();
+        let material = Hemispherical::new(Color::default());
+        b.iter(|| {
+            zip(&rays, &intersections)
+                .map(|(r, i)| material.scatter_at(&r, &i))
+                .flatten()
+                .count()
+        });
     }
 }
